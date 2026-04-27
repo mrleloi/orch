@@ -1,0 +1,4 @@
+{"event":"DISPATCHED","dispatch_id":"fix-tu-1","agent_type":"sandwich-architect","model":"opus","parent_session_id":"fixture-sess-1","bg":true,"ts_ms":1714255800000,"outcome":null,"tokens_used":null}
+{"event":"COMPLETED","dispatch_id":"fix-tu-1","agent_type":"sandwich-architect","model":"opus","parent_session_id":"fixture-sess-1","bg":true,"ts_ms":1714256214000,"outcome":"DONE","tokens_used":null}
+{"event":"DISPATCHED","dispatch_id":"fix-tu-2","agent_type":"task-implementer","model":"sonnet","parent_session_id":"fixture-sess-1","bg":true,"ts_ms":1714256300000,"outcome":null,"tokens_used":null}
+{"event":"COMPLETED","dispatch_id":"fix-tu-2","agent_type":"task-implementer","model":"sonnet","parent_session_id":"fixture-sess-1","bg":true,"ts_ms":1714256900000,"outcome":"DONE","tokens_used":null}

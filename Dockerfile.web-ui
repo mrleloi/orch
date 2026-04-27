@@ -1,0 +1,80 @@
+# Dockerfile.web-ui — Orch Web UI (packages/web-ui)
+#
+# Build context: repo root (docker-compose.yml `context: .`)
+# Image: node:20-slim
+#
+# Runs `vite preview` which serves the built React app.
+# Port: 4142 (matches vite.config.ts preview.port; override via VITE_PREVIEW_PORT env).
+#
+# Note: `vite preview` binds 127.0.0.1 by default per vite.config.ts.
+# For Docker we override to 0.0.0.0 so the container port is reachable.
+
+# ── Stage 1: deps ─────────────────────────────────────────────────────────────
+FROM node:20-slim AS deps
+
+RUN corepack enable
+
+WORKDIR /app
+
+# Workspace manifests
+COPY pnpm-workspace.yaml ./
+COPY pnpm-lock.yaml ./
+COPY package.json ./
+
+# Package manifests for filter graph
+COPY packages/core/package.json       ./packages/core/package.json
+COPY packages/shared/package.json     ./packages/shared/package.json
+COPY packages/cli/package.json        ./packages/cli/package.json
+COPY packages/telegram/package.json   ./packages/telegram/package.json
+COPY packages/web-ui/package.json     ./packages/web-ui/package.json
+
+# Install all deps (dev needed for vite build)
+RUN pnpm install --frozen-lockfile --filter=@orch/web...
+
+# ── Stage 2: build ────────────────────────────────────────────────────────────
+FROM deps AS build
+
+WORKDIR /app
+
+COPY packages/web-ui/src             ./packages/web-ui/src
+COPY packages/web-ui/public          ./packages/web-ui/public
+COPY packages/web-ui/index.html      ./packages/web-ui/index.html
+COPY packages/web-ui/tsconfig.json   ./packages/web-ui/tsconfig.json
+COPY packages/web-ui/tsconfig.app.json ./packages/web-ui/tsconfig.app.json
+COPY packages/web-ui/tsconfig.node.json ./packages/web-ui/tsconfig.node.json
+COPY packages/web-ui/vite.config.ts  ./packages/web-ui/vite.config.ts
+COPY packages/web-ui/postcss.config.js ./packages/web-ui/postcss.config.js
+COPY packages/web-ui/tailwind.config.js ./packages/web-ui/tailwind.config.js
+COPY packages/shared/src             ./packages/shared/src
+COPY packages/shared/tsconfig.json   ./packages/shared/tsconfig.json
+
+RUN pnpm --filter=@orch/web run build
+
+# ── Stage 3: runner ───────────────────────────────────────────────────────────
+FROM node:20-slim AS runner
+
+RUN corepack enable
+
+WORKDIR /app
+
+COPY pnpm-workspace.yaml ./
+COPY pnpm-lock.yaml ./
+COPY package.json ./
+COPY packages/core/package.json       ./packages/core/package.json
+COPY packages/shared/package.json     ./packages/shared/package.json
+COPY packages/cli/package.json        ./packages/cli/package.json
+COPY packages/telegram/package.json   ./packages/telegram/package.json
+COPY packages/web-ui/package.json     ./packages/web-ui/package.json
+
+# Production deps only (vite needed for preview command)
+RUN pnpm install --frozen-lockfile --filter=@orch/web...
+
+# Copy built dist from build stage
+COPY --from=build /app/packages/web-ui/dist ./packages/web-ui/dist
+COPY --from=build /app/packages/web-ui/vite.config.ts ./packages/web-ui/vite.config.ts
+
+EXPOSE 4142
+
+# Override host to 0.0.0.0 so Docker port binding works.
+# Port matches vite.config.ts preview.port = 4142.
+CMD ["pnpm", "--filter=@orch/web", "exec", "vite", "preview", "--host", "0.0.0.0", "--port", "4142"]

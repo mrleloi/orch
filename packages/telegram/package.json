@@ -1,0 +1,42 @@
+{
+  "name": "@orch/telegram",
+  "version": "2.2.0",
+  "description": "Orch Telegram adapter — Grammy bot, 6-command interface (Phase 2)",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint \"src/**/*.ts\"",
+    "test": "vitest run",
+    "dev": "node --import=tsx/esm src/main.ts",
+    "start": "node dist/main.js"
+  },
+  "dependencies": {
+    "grammy": "^1.30.0",
+    "@orch/shared": "workspace:*",
+    "@opentelemetry/api": "^1.9.0",
+    "dotenv": "^16.4.5",
+    "pino": "^9.5.0",
+    "undici": "^6.0.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.18.0",
+    "@types/node": "^20.0.0",
+    "eslint": "^9.18.0",
+    "globals": "^15.0.0",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.20.0",
+    "vitest": "^2.0.0"
+  }
+}

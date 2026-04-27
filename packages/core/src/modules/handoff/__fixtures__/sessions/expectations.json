@@ -1,0 +1,51 @@
+{
+  "2026-04-25-session-15-task-2.13.md": {
+    "completed": 4,
+    "pending": 0,
+    "decisions": 0,
+    "hasPickup": true,
+    "pickupContains": "Phase 3 is now active",
+    "missingSections": ["pending"],
+    "sessionDate": "2026-04-25",
+    "sessionNumber": 15
+  },
+  "2026-04-25-session-19-task-3.8.md": {
+    "completed": 3,
+    "pending": 0,
+    "decisions": 4,
+    "hasPickup": true,
+    "pickupContains": "Task 3.9",
+    "missingSections": ["pending"],
+    "sessionDate": "2026-04-25",
+    "sessionNumber": 19
+  },
+  "2026-04-25-session-1-task-1.10.md": {
+    "completedMin": 8,
+    "pending": 0,
+    "decisionsMin": 1,
+    "hasPickup": true,
+    "missingSections": ["pending"],
+    "sessionDate": "2026-04-25",
+    "sessionNumber": 1
+  },
+  "2026-04-24-session-1.md": {
+    "completedMin": 10,
+    "pending": 0,
+    "decisionsMin": 0,
+    "hasPickup": true,
+    "pickupContains": "Phase 1",
+    "missingSections": ["pending", "decisions"],
+    "sessionDate": "2026-04-24",
+    "sessionNumber": 1
+  },
+  "2026-04-25-session-13-task-2.9.md": {
+    "completedMin": 8,
+    "pending": 0,
+    "decisionsMin": 1,
+    "hasPickup": true,
+    "pickupContains": "complete",
+    "missingSections": ["pending"],
+    "sessionDate": "2026-04-25",
+    "sessionNumber": 13
+  }
+}

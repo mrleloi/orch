@@ -1,0 +1,2 @@
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"continue"}]},"uuid":"u1"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"tool_use","id":"toolu_01","name":"Agent","input":{"description":"Run sandwich-verifier","prompt":"verify phase 5"}}]},"stop_reason":"tool_use","uuid":"a1"}

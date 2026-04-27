@@ -1,0 +1,43 @@
+1. đã hoàn thành xong phase 7, giờ có 3 mục tiêu chính cần làm tiếp theo, khiến tôi phải can thiệp thủ công trước khi bắt đầu phase 8 theo kế hoạch:
+1.1. kiểm tra lại hệ thống agent config/settings hiện tại, tôi đánh giá độ drift đã là khá nhiều.
+giờ nhìn vào hệ thống agent config/settings, tôi không thể nhìn ra bất kì quy luật hay format hay rule nào nữa.
+1.2. chính vì 1.1, nên hình như các công đoạn "verify" cũng không diễn ra thực sự đúng. ví dụ verify cho cả một phase sau khi phase đó hoàn thành, hoặc sau khi hoàn thành một số lượng session nhất định.
+mục tiêu là để kiểm tra xem llm có tuân thủ đúng workflow, config/settings không, tìm ra các lỗi (cả do llm, do environment, do runtime, do human, etc...), kịp thời phát hiện sớm và can thiệp, bổ sung, theo dõi.
+1.3. chính vì 1.2, nên tôi không chắc trạng thái hiện tại của dự án có bị drift xa bao nhiêu so với yêu cầu ban đầu, cả trong khâu plan, ý tưởng, cho tới khâu implement, fix bugs, trải qua nhiều phase, nhiều session thiếu verify đầy đủ, tôi cần phân tích lại một cách an toàn để đảm bảo hệ thống cuối cùng thực sự ổn định.
+1.4. hệ thống hook và deterministic approach (sử dụng các script) chưa thực sự đầy đủ. nếu chưa phân tích ra được các task nào tận dụng thế mạnh của llm, task nào cần phải sử dụng các deterministic approach để quản lý, thì sẽ không kiểm soát được drift và chất lượng một cách tổng thể.
+từ các learning lession, notes, knowledge, cần phải build hệ thống hooks, script, orchestrator một cách mạnh mẽ hơn nữa.
+1.5. quan trọng, hệ thống hiện tại đã có thể sử dụng để tự nâng cấp chính nó chưa? tôi cho rằng hoàn thành 7 phase hiện tại đã có thể thực sự đưa vào sử dụng thực tế, để học từ practive được rồi.
+phase 8 và các phase tiếp theo nên thực sự được tiếp cận bằng cách dùng chính dự án này, một công cụ hỗ trợ code, để tự code và theo dõi quá trình, tự nâng cấp chính nó, với goals và objective do human đề ra.
+điều này cần phải thực hiện được, tracking quá trình này sẽ giống như tracking một project độc lập như thực sự áp dụng hỗ trợ cho main project.
+1.6. liên quan đến 1.5, ý tưởng là sau này khi áp dụng "orch" cho việc hỗ trợ code dự án khác, thì chúng cần phải được quản lý, theo dõi, tracking, đánh giá, nâng cấp, và quan trọng nhất là khả năng tự nâng cấp độc lập ở mỗi dự án, và mỗi người sử dụng.
+chưa cần tính đến chuyện sẽ biến dự án này thành "saas", thì use case đơn giản nhất thiết thực nhất là tôi và một đồng nghiệp sẽ cùng sử dụng "orch" cho việc lập trình thực tế.
+thì chúng tôi sẽ cần quản lý một hoặc nhiều dự án chung và riêng, nên khả năng sharing và personal phải được tính toán, nhất là phục vụ cho tính năng tracking và tự nâng cấp.
+1.7. một ý tưởng quan trọng, tôi sẽ cần bạn bắt buộc hoàn thành trước khi kết thúc dự án này, đó là khả năng sharing được cho community, để thu thập dữ liệu.
+ý tưởng của tôi là, chúng ta hoàn toàn có thể cung cấp tool "orch" này như một công cụ hỗ trợ coding autonomous miễn phí, hoàn toàn có thể open source và được đóng góp bởi cộng đồng.
+người dùng có thể sử dụng claude code của họ, trên máy tính của họ, tài khoản của họ, và sẽ có những "layer" cấu hình khác nhau. 
+tương tự như claude code, hệ thống của họ đã có system prompt, mặc định do họ cài đặt từ trong chính model khi post-training, rồi claude code rules, rồi đến hệ thống cấu hình cấp độ người dùng, cấp độ dự án, thì dự án này để đạt được yêu cầu của tôi, cũng phải "fetch" các cấu hình, config/settings một cách có thứ tự, có chủ đích.
+chúng ta hoàn toàn cho phép họ tham khảo cấu hình của chúng ta, cho phép họ tự custom thêm để phù hợp với yêu cầu sử dụng, của từng người, của từng dự án. 
+và above all, sau tất cả những điều đó, chúng ta cung cấp thêm các khả năng tự upgrade, tự testing, tự thống kê, tự sửa lỗi, etc... như chúng ta đang làm.
+thì tôi nghĩ quan trọng chúng ta cần phải:
+- configuration hóa được toàn bộ các dữ liệu, thông tin cần thiết. cần phải có biến tùy chỉnh cho người dùng, dự án, như env, config json file, hệ thống markdown files
+- khả năng tự nâng cấp, phải được tiến hành một cách có hệ thống, đầy đủ các khâu thu thập dữ liệu người dùng ở local, theo từng dự án, phi tập trung, rồi được sync về hệ thống tổng hợp của chúng ta.
+thông qua khả năng thu thập dữ liệu, chúng ta hoàn toàn tận dụng được hệ sinh thái người dùng sử dụng tool "orch", họ dùng các tài khoản trả phí và chạy tool của chúng ta, giúp chúng ta thu thập được lỗi, tracking, session, budget, etc... 
+điều này nếu không được hệ thống hóa sẽ trở thành một đống rác thông tin, nhưng với cách tiếp cận có chủ đích thu thập dữ liệu từ ban đầu, chúng thực sự có thể mang lại khả năng tự thu thập, tự nâng cấp một cách có kiểm soát.
+- ý tưởng xa hơn của tôi là không chỉ do mỗi tool hỗ trợ coding, mà nhìn rộng qua là khả năng thu thập "domain workflow", cho bất kì tool nào khả thi, như tool hỗ trợ autonomous cho marketing, hay kế toán, chat support, etc...
+cái llm cần để thực sự trở nên hiệu quả với người dùng trên số lượng lớn, là domain knowledge về workflow và insight thực tế khi xử lý các data. chúng ta không cố gắng thu thập data về domain knowledge như một expertise, một chuyên gia trong domain, mà chúng ta trở thành một chuyên gia về workflow trong domain, còn cụ thể mỗi step, sử dụng domain knowledge như thế nào thì đã có các agent và các dataset chuyên dụng tham gia vào giải quyết.
+=> chúng ta định vị mình là một tool chuyên gia về "domain workflow autonomous knowledge", với coding là domain đầu tiên. nên cách tiếp cận để thu thập, xử lý và sử dụng thông tin phải mang tính hệ thống nhằm đạt được mục tiêu như vậy.
+1.8. thêm một lưu ý về claude code:
+- hiện tại claude code, chức năng "/effort", ví dụ "/effort high" là chế độ tôi sử dụng từ đầu dự án đến giờ. ngoài ra còn các mode như "low, medium, xhigh, max"/
+thì tùy trường hợp và bài toán, tôi sẽ cho phép bạn tận dụng toàn bộ khả năng của chức năng này, chúng mang lại sự khác biệt lớn về chất lượng của output.
+ở những task đánh giá là khó, phức tạp, mang lại tác động lớn, như các task planning, hay tổng hợp learning lession để tự nâng cấp, cần khả năng tư duy mạnh, kết quả trả về mang yếu tố quyết định, hãy tự động sử dụng "/effort max".
+ngược lại, cũng là agent "opus", nhưng có những task hoàn toàn có thể sử dụng "/effort low" là đủ. tương tự với "sonnet".
+- ngoài ra, claude code đã cho phép một session bật tính năng "/remote-control". tính năng này cho phép app claude ở mobile có thể trực tiếp theo dõi session trên claude code ở máy tính và nơi khác, cũng hoàn toàn tương tác trực tiếp được luôn, prompt hoặc accept permission.
+đây là một tính năng mang lại sự trải nghiệm đột phá, thậm chí so với function telegram remote ban đầu.
+
+=> đánh giá lại dự án, mục tiêu, các plan, chỉnh sửa nâng cấp lại nếu cần, bao gồm cả các công việc chuẩn bị tiến hành trước đó.
+=> sau đó bắt đầu thực hiện theo chế độ autonomous, tự động hóa hoàn toàn.
+
+2. một số lưu ý:
+- chia subagent đúng model claude, chia sonnet và opus, với effort mode phù hợp để hoàn thành những việc phù hợp.
+- folder "C:\htdocs\orch-starter" hoàn toàn cho phép bạn tùy chỉnh mọi thứ
+- không cần hỏi thêm ý kiến tôi, tự động hoàn thành theo đề xuất hợp lý của bạn, chỉ dừng lại công việc sau khi toàn bộ công việc của dự án đã hoàn thành

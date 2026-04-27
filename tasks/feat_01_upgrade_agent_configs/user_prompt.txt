@@ -1,0 +1,14 @@
+1. tôi tiến hành phân tích core base của agent config/settings dự án stockforge (main project, base agent configs mà dự án này kế thừa), với các repo đang trending để học hỏi.
+mục đích là trước khi implement dự án này (side project hỗ trợ code main project), cập nhật các agent configs/settings thêm nữa, nhằm:
+- hiệu quả hơn đối với workflow cho claude, claude code, agents
+- tương thích, phù hợp với mục tiêu mà dự án này đang xây dựng
+
+cụ thể đoạn hội thoại trong file "C:\htdocs\orch-starter\tasks\feat_01_upgrade_agent_configs\chat_research_other_repo.md".
+=> bạn tự git clone các repo public này về nếu cần hiểu sâu thêm nữa để phân tích kĩ thêm nữa.
+=> sau đó tiến hành đánh giá, phân tích kĩ với hệ thống hiện tại để tiến hành bổ sung, thực hiện chỉnh sửa và nâng cấp.
+
+1.1. một số lưu ý:
+- chia subagent đúng model claude, chia sonnet và opus, với effort mode phù hợp để hoàn thành những việc phù hợp.
+- folder "C:\htdocs\orch-starter" hoàn toàn cho phép bạn tùy chỉnh mọi thứ
+- không cần hỏi thêm ý kiến tôi, tự động hoàn thành theo đề xuất hợp lý của bạn, chỉ dừng lại công việc sau khi hoàn toàn xác nhận
+- khi áp dụng flow tạo plan/chia session/execute session, thì việc chuyển sang next session, tự động mở thành phiên hội thoại mới (tương tự "/clear") và tiếp tục thực hiện theo plan

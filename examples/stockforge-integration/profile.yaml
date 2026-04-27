@@ -1,0 +1,97 @@
+# .orch/profile.yaml — Orch integration profile for StockForge
+#
+# Copy this file to <stockforge-root>/.orch/profile.yaml and adjust paths.
+# All fields are validated against ProfileSchema in packages/core/src/domain/profile.ts.
+# No secrets in this file — use environment variables or the hookSecret env reference.
+
+# ── Identity ───────────────────────────────────────────────────────────────────
+
+# URL-safe identifier: lowercase, hyphens allowed, no spaces.
+projectId: stockforge
+
+# Absolute path to the StockForge project root on this machine.
+# Windows example: "C:\\htdocs\\stockforge"
+# Unix example:    "/Users/nathanleewindy/projects/stockforge"
+rootPath: "C:\\htdocs\\stockforge"
+
+# ── Runtime ────────────────────────────────────────────────────────────────────
+
+# Name of the ccs profile to use when spawning sessions (run `ccs list` to see options).
+ccsProfile: nathanleewindy
+
+# Maximum concurrent active sessions across ALL session types (serial by default).
+maxConcurrentSessions: 1
+
+# ── Session types ──────────────────────────────────────────────────────────────
+#
+# At least one session type is required. Each maps to a category of work.
+# promptTemplate may contain {{plan}} which is replaced with the plan file content.
+
+sessionTypes:
+  - name: backtest
+    promptTemplate: |
+      You are executing a backtest session for StockForge.
+      Plan: {{plan}}
+
+      Run the requested historical backtest. Capture results to the project output
+      directory. Summarise pass/fail with PnL and Sharpe ratio in a markdown report.
+      Stage all output files. Do NOT commit unless the plan says so.
+    model: claude-opus-4-5
+    maxConcurrent: 1
+
+  - name: strategy-generation
+    promptTemplate: |
+      You are implementing a trading strategy for StockForge.
+      Plan: {{plan}}
+
+      Follow the spec exactly. Write tests alongside the implementation.
+      Stage changes. Do NOT commit unless the plan explicitly says so.
+    maxConcurrent: 1
+
+  - name: live-trading-simulation
+    promptTemplate: |
+      You are running a live-trading paper simulation for StockForge.
+      Plan: {{plan}}
+
+      Connect to the paper-trading adapter only. Log all signals and orders to the
+      simulation output directory. Do NOT place real orders under any circumstances.
+    maxConcurrent: 1
+
+# ── Hook targets ───────────────────────────────────────────────────────────────
+#
+# These tell Orch which hook events to expect from this project.
+# The actual hook registration lives in <stockforge>/.claude/settings.json —
+# see hooks-snippet.json in this folder for the commands to paste there.
+# URL port must match ORCH_HTTP_PORT (default 4141).
+
+hookTargets:
+  - event: SessionStart
+    url: "http://127.0.0.1:4141/hooks/SessionStart"
+  - event: SessionEnd
+    url: "http://127.0.0.1:4141/hooks/SessionEnd"
+  - event: UserPromptSubmit
+    url: "http://127.0.0.1:4141/hooks/UserPromptSubmit"
+  - event: PreToolUse
+    url: "http://127.0.0.1:4141/hooks/PreToolUse"
+  - event: PostToolUse
+    url: "http://127.0.0.1:4141/hooks/PostToolUse"
+  - event: PreCompact
+    url: "http://127.0.0.1:4141/hooks/PreCompact"
+  - event: Stop
+    url: "http://127.0.0.1:4141/hooks/Stop"
+  - event: Notification
+    url: "http://127.0.0.1:4141/hooks/Notification"
+
+# ── Queue sources ──────────────────────────────────────────────────────────────
+#
+# Orch watches these directories for incoming plan files (*.md).
+# Adjust the path to match your StockForge checkout location.
+
+queueSources:
+  - path: "C:\\htdocs\\stockforge\\session-plans\\pending"
+    glob: "*.md"
+
+# ── Optional flags ─────────────────────────────────────────────────────────────
+
+langfuseEnabled: false
+disableSecretRedaction: false

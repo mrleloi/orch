@@ -1,0 +1,256 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(grep:*)",
+      "Bash(rg:*)",
+      "Bash(find:*)",
+      "Bash(wc:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(tree:*)",
+      "Bash(file:*)",
+      "Bash(stat:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(git branch:*)",
+      "Bash(git add:*)",
+      "Bash(git restore:*)",
+      "Bash(git stash:*)",
+      "Bash(git clone --depth 1:*)",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm run:*)",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm exec:*)",
+      "Bash(pnpm list:*)",
+      "Bash(pnpm typecheck:*)",
+      "Bash(pnpm lint:*)",
+      "Bash(pnpm test:*)",
+      "Bash(pnpm build:*)",
+      "Bash(pnpm dev:*)",
+      "Bash(npx:*)",
+      "Bash(node:*)",
+      "Bash(tsc:*)",
+      "Bash(vitest:*)",
+      "Bash(eslint:*)",
+      "Bash(prettier:*)",
+      "Bash(prisma:*)",
+      "Bash(pnpm prisma:*)",
+      "Bash(curl:*)",
+      "Bash(nc:*)",
+      "Bash(mkdir:*)",
+      "Bash(touch:*)",
+      "Bash(cp:*)",
+      "Bash(mv:*)",
+      "Bash(chmod:*)",
+      "Bash(docker compose:*)",
+      "Bash(docker ps:*)",
+      "Bash(docker logs:*)",
+      "Read(*)",
+      "Write(packages/**)",
+      "Write(examples/**)",
+      "Write(docs/**)",
+      "Write(specs/**)",
+      "Write(prisma/**)",
+      "Write(docker/**)",
+      "Write(reference-repos/**)",
+      "Write(.github/**)",
+      "Write(.husky/**)",
+      "Write(.vscode/**)",
+      "Write(.claude/**)",
+      "Write(agent-workspace/memory/sessions/**)",
+      "Write(agent-workspace/memory/decisions/**)",
+      "Write(agent-workspace/memory/patterns-discovered/**)",
+      "Write(agent-workspace/memory/post-mortems/**)",
+      "Write(agent-workspace/memory/phase-*-complete.md)",
+      "Write(agent-workspace/memory/project-complete.md)",
+      "Write(agent-workspace/memory/escalation.md)",
+      "Write(agent-workspace/memory/observations/**)",
+      "Write(agent-workspace/memory/checkpoints/**)",
+      "Write(agent-workspace/research/**)",
+      "Write(agent-workspace/quality-reports/**)",
+      "Write(agent-workspace/session-plans/pending/**)",
+      "Write(agent-workspace/session-plans/completed/**)",
+      "Edit(packages/**)",
+      "Edit(examples/**)",
+      "Edit(docs/**)",
+      "Edit(specs/**)",
+      "Edit(prisma/**)",
+      "Edit(docker/**)",
+      "Edit(.github/**)",
+      "Edit(.claude/**)",
+      "Edit(agent-workspace/memory/project.md)",
+      "Edit(agent-workspace/memory/current-execution.md)",
+      "Edit(agent-workspace/memory/agent-notes.md)",
+      "Edit(agent-workspace/research/**)",
+      "Edit(agent-workspace/session-plans/**)",
+      "Edit(package.json)",
+      "Edit(pnpm-workspace.yaml)",
+      "Edit(tsconfig.base.json)",
+      "Edit(tsconfig.json)",
+      "Edit(.gitignore)",
+      "Edit(.nvmrc)",
+      "Edit(.eslintrc.js)",
+      "Edit(.prettierrc)",
+      "Edit(README.md)",
+      "Edit(LICENSE)",
+      "Edit(AGENTS.md)",
+      "Write(AGENTS.md)"
+    ],
+    "deny": [
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(git clean -fd:*)",
+      "Bash(rm -rf /:*)",
+      "Bash(rm -rf ~/:*)",
+      "Bash(rm -rf /home:*)",
+      "Bash(rm -rf /mnt:*)",
+      "Bash(sudo:*)",
+      "Bash(su:*)",
+      "Bash(DROP:*)",
+      "Bash(DELETE FROM:*)",
+      "Write(~/.claude/**)",
+      "Write(~/.ccs/**)",
+      "Write(/etc/**)",
+      "Read(~/.claude/**/*.json)",
+      "Read(~/.ccs/**/*.json)",
+      "Read(~/.ccs/**/auth/**)",
+      "Bash(npm publish:*)",
+      "Bash(pnpm publish:*)"
+    ]
+  },
+  "env": {
+    "NODE_ENV": "development",
+    "ORCH_HOOK_PROFILE": "standard",
+    "ORCH_SPAWNED": "false",
+    "CLAUDE_CODE_ENABLE_TELEMETRY": "1",
+    "OTEL_SERVICE_NAME": "claude-code-orch-builder",
+    "OTEL_METRICS_EXPORTER": "otlp",
+    "OTEL_LOGS_EXPORTER": "otlp",
+    "OTEL_TRACES_EXPORTER": "otlp",
+    "OTEL_EXPORTER_OTLP_PROTOCOL": "http/protobuf",
+    "OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:4318",
+    "OTEL_METRIC_EXPORT_INTERVAL": "10000"
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mkdir -p \"${CLAUDE_PROJECT_DIR:-.}/agent-workspace/memory\" && echo \"[$(date -Iseconds)] SessionStart session=$CLAUDE_SESSION_ID cwd=$PWD profile=${ORCH_HOOK_PROFILE:-standard} spawned=${ORCH_SPAWNED:-false}\" >> \"${CLAUDE_PROJECT_DIR:-.}/agent-workspace/memory/.session-hooks.log\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/session-start-bootstrap.sh\""
+          }
+        ]
+      },
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/component-telemetry.sh\""
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mkdir -p \"${CLAUDE_PROJECT_DIR:-.}/agent-workspace/memory\" && echo \"[$(date -Iseconds)] SessionEnd session=$CLAUDE_SESSION_ID\" >> \"${CLAUDE_PROJECT_DIR:-.}/agent-workspace/memory/.session-hooks.log\""
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mkdir -p \"${CLAUDE_PROJECT_DIR:-.}/agent-workspace/memory\" && echo \"[$(date -Iseconds)] Stop session=$CLAUDE_SESSION_ID\" >> \"${CLAUDE_PROJECT_DIR:-.}/agent-workspace/memory/.session-hooks.log\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/budget-watchdog.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/autonomous-stop-watchdog.sh\""
+          },
+          {
+            "type": "command",
+            "command": "[ \"${ORCH_HOOK_PROFILE:-standard}\" = \"strict\" ] && bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/tool-call-first-lint.sh\" || :"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/dispatch-jsonl-recorder.sh\""
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/budget-watchdog.sh\""
+          }
+        ]
+      },
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/component-telemetry.sh\""
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/subagent-stop-logger.sh\""
+          }
+        ]
+      },
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/component-telemetry.sh\""
+          }
+        ]
+      },
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/dispatch-jsonl-recorder.sh\""
+          }
+        ]
+      }
+    ]
+  }
+}

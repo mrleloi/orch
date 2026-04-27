@@ -1,0 +1,20 @@
+version: "3.9"
+
+services:
+  lgtm:
+    image: grafana/otel-lgtm:1.4.0
+    container_name: lgtm
+    ports:
+      - "3000:3000"   # Grafana UI (admin/admin)
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+    volumes:
+      # Grafana provisioning — datasources, dashboard catalog, dashboard JSONs.
+      - ./grafana-datasources.yml:/otel-lgtm/grafana/conf/provisioning/datasources/datasources.yaml:ro
+      - ./grafana-dashboards.yml:/otel-lgtm/grafana/conf/provisioning/dashboards/dashboards.yaml:ro
+      - ./dashboards:/var/lib/grafana/dashboards:ro
+      # OTEL Collector config (accepts OTLP gRPC/HTTP, forwards to Prometheus/Loki/Tempo).
+      - ./collector-config.yaml:/otel-lgtm/otelcol-config.yaml:ro
+      # Prometheus scrape config (for any pull-mode metrics alongside OTEL push).
+      - ./prometheus.yml:/otel-lgtm/prometheus.yml:ro
+    restart: unless-stopped

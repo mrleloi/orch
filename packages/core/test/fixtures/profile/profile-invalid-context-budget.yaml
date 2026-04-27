@@ -1,0 +1,10 @@
+projectId: test-project-invalid-budget
+rootPath: /tmp/test-project-invalid-budget
+sessionTypes:
+  - name: impl
+    promptTemplate: "Implement: {{plan}}"
+ccsProfile: personal
+contextBudget:
+  warnAtTokens: 230000
+  forceHandoffAtTokens: 200000
+  # Invalid: warn >= force — expected to fail validation

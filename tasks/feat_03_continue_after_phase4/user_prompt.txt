@@ -1,0 +1,24 @@
+1. đã hoàn thành đủ phase 0 - phase 4, một số yêu cầu human tham gia để deploy hiện tại là chưa cần thiết (npm, ci, git) có thể bỏ qua, sẽ hoàn thành khi final version chạy được ok, giờ tiếp tục phát triển phiên bản tiếp theo.
+một số yêu cầu ngay lúc này:
+1.1. hệ thống của chúng ta, bản thân sử dụng claude code để full autonomous để phát triển, đã trải qua rất nhiều phase, session, vừa full autonomous vừa kết hợp human handle error (để tiếp tục autonomous khi xảy ra lỗi).
+- đây cũng là một chức năng quan trọng nhất của dự án orch này, full autonomous mode, nên bạn hoàn toàn có thể tận dụng kinh nghiệm của quá trình phát triển này, nó là learning lession value nhất, để áp dụng các agent configs/settings, workflow, vào cho sản phẩm orch
+- đồng thời, tiến hành đánh giá lại toàn bộ tracking history, chức năng agent tracking (do llm tự động hóa hoàn toàn) là back bone của hệ thống orch, thông qua 4 phase vừa rồi, đánh giá lại kết quả thực tế tracking. 
+  ví dụ có thừa thiếu, bỏ quên, không track file nào không, memory nào không, tôi nghĩ phần lớn sẽ check trong "agent-workspace" folder 
+- quan trọng nhất, giống như nhiều lần human handle case trong 4 phase vừa rồi, bạn phải tracing và deep-dive được lý do thực sự, nguyên nhân dẫn đến lỗi, từ đó tạo note và update, đưa ra bản fix và action thích hợp, không chỉ đơn giản là thông báo cho human, mà phải tự self-upgrade, self-learning, tự cải thiện hệ thống của bạn theo thời gian.
+1.2. công việc tiếp theo cần làm:
+- bản thân hệ thống orch này, các cấu hình agent config/settings, workflow, etc... của nó cũng cần được tiến hóa, self-learning, self-upgrade.
+  ví dụ các skill master planner, skill execute, etc... chúng đã được tracking đầy đủ, hoàn toàn cho phép chúng tự đánh giá, tự tiến hóa, để tăng độ chính xác và performance; bởi vì chúng ta phụ thuộc hầu hết chất lượng của output bằng llm, nên input/prompt quyết định rất nhiều, chúng ta sẽ dùng lợi thế tracking system để biến llm thành lợi thế lâu dài.
+- ý tưởng đằng sau là coi mọi thứ của hệ thống có thể testing được, kể cả skill, command, workflows, etc... bản thân hệ thống tự đánh giá các thành phần của nó đã hiệu quả chưa, test bằng cách nào, các metrics, goals, objective nào cần quan tâm, để đưa chúng vào như một thành phần của hệ thống self-loop-upgrade chính nó.
+- thêm một yêu cầu nữa là, nếu coi hệ thống master agent, sub agent, như hệ thống queue job, việc quyết định job nào chạy trước, chạy sau, chạy lại, và quan trọng nhất, chạy song song, là quan trọng nhất.
+  một phase hay một phiên, có 3 yếu tố chính: chất lượng, thời gian, ngân sách. chất lượng sẽ được quyết định bởi input, do planning tác động, quá trình execute, verify, re-implement, etc... là cái chúng ta đang tập trung vào. nhưng thời gian, thông qua 4 phase vừa rồi, có thể đánh giá là vẫn có thể cải tiến.
+=> phải tìm cách bắt đầu chia ra, horizontal, vertical, các strategy để chia nhỏ ra, parallel một cách có kiểm soát và có ý chí, tự chủ động plan, execute, đo lường, để tự cải thiện khả năng ra quyết định, khả năng simulation của mình, tiến tới đạt kết quả tốt hơn.
+1.3. một repo đáng chú ý là "https://github.com/mrgoonie/claudekit-skills" và "https://docs.claudekit.cc/vi/docs//" và "https://github.com/mrleloi/claude-code-learn".
+=> chúng là những tài nguyên đáng chú ý để tiếp tục cải thiến hệ thống hiện tại, nhất là claudekit, cần crawl đủ document library của hệ thống này về để đánh giá các thành phần, idea, và đặc biệt là claude-code-learn repo, chứa thông tin về kiến trúc của "claude code", một framework solid trong việc "hiểu" agent/agent orchestrator, có rất nhiều value đằng sau chúng.
+=> tiến hành clone các thông tin về, rồi phân tích, đánh giá chi tiết nhất có thể.
+=> đánh giá lại dự án, mục tiêu, các plan, chỉnh sửa nâng cấp lại nếu cần.
+=> sau đó bắt đầu thực hiện theo chế độ autonomous, tự động hóa hoàn toàn, bắt đầu từ những công việc còn chưa hoàn thành của phase 4 cho đến những phase mới nếu có.
+
+1.5. một số lưu ý:
+- chia subagent đúng model claude, chia sonnet và opus, với effort mode phù hợp để hoàn thành những việc phù hợp.
+- folder "C:\htdocs\orch-starter" hoàn toàn cho phép bạn tùy chỉnh mọi thứ
+- không cần hỏi thêm ý kiến tôi, tự động hoàn thành theo đề xuất hợp lý của bạn, chỉ dừng lại công việc sau khi toàn bộ công việc của dự án đã hoàn thành

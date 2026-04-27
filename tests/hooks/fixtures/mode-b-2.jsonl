@@ -1,0 +1,3 @@
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"continue"}]},"uuid":"aaa2"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"Dispatching task-implementer for subtask 5.1.4."}]},"uuid":"bbb2"}
+{"type":"error","error":{"type":"overloaded_error","message":"Overloaded"}}

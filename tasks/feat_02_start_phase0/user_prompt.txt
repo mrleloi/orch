@@ -1,0 +1,9 @@
+1. vừa hoàn thành task "C:\htdocs\orch-starter\tasks\feat_01_upgrade_agent_configs", có một số cập nhật so với plan đầu về agent config/settings.
+=> dùng hệ thống agent config/settings mới để đánh giá lại dự án, mục tiêu, các plan, chỉnh sửa nâng cấp lại nếu cần.
+=> sau đó bắt đầu thực hiện theo chế độ autonomous, tự động hóa hoàn toàn.
+
+1.1. một số lưu ý:
+- chia subagent đúng model claude, chia sonnet và opus, với effort mode phù hợp để hoàn thành những việc phù hợp.
+- folder "C:\htdocs\orch-starter" hoàn toàn cho phép bạn tùy chỉnh mọi thứ
+- không cần hỏi thêm ý kiến tôi, tự động hoàn thành theo đề xuất hợp lý của bạn, chỉ dừng lại công việc sau khi hoàn toàn xác nhận
+- khi áp dụng flow tạo plan/chia session/execute session, thì việc chuyển sang next session, tự động mở thành phiên hội thoại mới (tương tự "/clear") và tiếp tục thực hiện theo plan

@@ -1,0 +1,39 @@
+# C1 smoke fixture — verifies harness parses and validates a well-formed envelope.
+# Spec §6.1 (self-application-bootstrap.md §6.1)
+# Subagent: task-implementer (lowest-stakes smoke test)
+# This fixture is used by gate C4 (--dry-run mode) and unit tests.
+
+envelope_id: phase-8-c1-smoke
+schema_version: "1"
+
+tenancy:
+  user: self
+  project: orch
+  is_self_app: true
+
+subagent_type: task-implementer
+model: sonnet
+effort: low
+
+prompt_path: tasks/phase-8/c1-smoke-prompt.md
+dispatch_trace_path: agent-workspace/traces/phase-8-c1-smoke.jsonl
+rollback_marker_path: agent-workspace/memory/.dogfood-stop
+budget_cap_tokens: 10000
+
+handoff:
+  prior_substage: "8.5.1"
+  expected_output_path: agent-workspace/memory/.dogfood-c1-smoke-output.txt
+
+preflight_assertions:
+  - kind: tenancy_lock
+    expect_user: self
+    expect_project: orch
+  - kind: budget_envelope
+    max_tokens: 120000
+
+metadata:
+  authoring_phase: 8
+  authoring_substage: "8.5.2"
+  master_plan_ref: agent-workspace/session-plans/pending/phase-8-v2.3-strategic-pivot.md
+  triggered_by: substage 8.5.2 dogfood checkpoint C1
+  dogfood_checkpoint: C1

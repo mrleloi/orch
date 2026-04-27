@@ -1,0 +1,2 @@
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"continue"}]},"uuid":"u1"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"About to dispatch master-planner for phase decomposition."}]},"stop_reason":"end_turn","uuid":"a1"}

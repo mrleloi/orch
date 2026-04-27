@@ -1,0 +1,140 @@
+# Orch — Docker Compose stack
+#
+# Three profiles (stacked via Compose `profiles:` keyword):
+#
+#   default (no profile flag):
+#     docker compose up -d
+#     Starts only: orch-core (daemon + SQLite, port 4141)
+#
+#   observability:
+#     docker compose --profile observability up -d
+#     Adds: langfuse-web (LLM trace UI, port 3100) + postgres (Langfuse storage, port 5432)
+#     Reference: https://langfuse.com/docs/deployment/self-host (v3 self-hosted)
+#
+#   full:
+#     docker compose --profile observability --profile full up -d
+#     Adds: orch-web-ui (Vite preview, port 5173)
+#     Note: 'full' implies 'observability'; both profile flags are required.
+#
+# Credentials: all secrets use ${VAR:-default} expansion.
+#   Override in a .env file at the repo root or by exporting env vars.
+#   NEVER commit real credentials. The defaults are dev-only placeholders.
+#
+# Image versions: pinned to specific majors. Update intentionally.
+#
+# Upstream Langfuse compose reference:
+#   https://github.com/langfuse/langfuse/blob/main/docker-compose.yml
+
+services:
+  # ── orch-core ────────────────────────────────────────────────────────────────
+  # The Orch daemon. Binds on 0.0.0.0 inside the container so Docker can
+  # reach it; host sees 127.0.0.1:4141 (ORCH_HTTP_HOST overridden below).
+  orch-core:
+    build:
+      context: .
+      dockerfile: Dockerfile.core
+    image: orch/core:latest
+    restart: unless-stopped
+    ports:
+      - "${ORCH_HOST_PORT:-127.0.0.1:4141}:4141"
+    environment:
+      ORCH_HTTP_HOST: "0.0.0.0"
+      ORCH_HTTP_PORT: "4141"
+      ORCH_HOOK_SECRET: "${ORCH_HOOK_SECRET:-orchdev-hook-secret-change-me}"
+      ORCH_API_BEARER_TOKEN: "${ORCH_API_BEARER_TOKEN:-orchdev-api-token-change-me}"
+      ORCH_HOME: "/data/orch"
+      ORCH_LOG_LEVEL: "${ORCH_LOG_LEVEL:-info}"
+      ORCH_TRACE_BACKEND: "${ORCH_TRACE_BACKEND:-otlp}"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "${OTEL_EXPORTER_OTLP_ENDPOINT:-}"
+      ORCH_TRACE_BACKEND_UI_URL: "${ORCH_TRACE_BACKEND_UI_URL:-}"
+      # Langfuse vars — required only when ORCH_TRACE_BACKEND=langfuse
+      LANGFUSE_OTLP_ENDPOINT: "${LANGFUSE_OTLP_ENDPOINT:-}"
+      LANGFUSE_PUBLIC_KEY: "${LANGFUSE_PUBLIC_KEY:-}"
+      LANGFUSE_SECRET_KEY: "${LANGFUSE_SECRET_KEY:-}"
+    volumes:
+      # Persist SQLite DB + auth tokens across container restarts.
+      # Host path: ~/.orch (override ORCH_DATA_HOST to change mount source).
+      - "${ORCH_DATA_HOST:-~/.orch}:/data/orch"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4141/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  # ── postgres ─────────────────────────────────────────────────────────────────
+  # PostgreSQL for Langfuse metadata storage.
+  # Only starts with --profile observability.
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    profiles:
+      - observability
+    environment:
+      POSTGRES_USER: "${POSTGRES_USER:-langfuse}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-orchdev}"
+      POSTGRES_DB: "${POSTGRES_DB:-langfuse}"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-langfuse}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── langfuse-web ─────────────────────────────────────────────────────────────
+  # Langfuse self-hosted server (v3). LLM trace UI + cost attribution.
+  # Reference: https://langfuse.com/docs/deployment/self-host
+  # Only starts with --profile observability.
+  langfuse-web:
+    image: langfuse/langfuse:3
+    restart: unless-stopped
+    profiles:
+      - observability
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "${LANGFUSE_HOST_PORT:-127.0.0.1:3100}:3000"
+    environment:
+      DATABASE_URL: "postgresql://${POSTGRES_USER:-langfuse}:${POSTGRES_PASSWORD:-orchdev}@postgres:5432/${POSTGRES_DB:-langfuse}"
+      NEXTAUTH_URL: "${LANGFUSE_NEXTAUTH_URL:-http://localhost:3100}"
+      NEXTAUTH_SECRET: "${LANGFUSE_NEXTAUTH_SECRET:-orchdev-nextauth-secret-change-me}"
+      SALT: "${LANGFUSE_SALT:-orchdev-salt-change-me}"
+      ENCRYPTION_KEY: "${LANGFUSE_ENCRYPTION_KEY:-0000000000000000000000000000000000000000000000000000000000000000}"
+      LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES: "${LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES:-false}"
+      # Allow ingest without auth in dev; set to true in production
+      LANGFUSE_INIT_ORG_NAME: "${LANGFUSE_INIT_ORG_NAME:-orch}"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/public/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # ── orch-web-ui ───────────────────────────────────────────────────────────────
+  # Orch Web UI — Vite preview server of the built React app.
+  # Only starts with --profile full (which also requires --profile observability).
+  orch-web-ui:
+    build:
+      context: .
+      dockerfile: Dockerfile.web-ui
+    image: orch/web-ui:latest
+    restart: unless-stopped
+    profiles:
+      - full
+    # Port 4142 matches vite.config.ts preview.port (not 5173 — the plan said 5173
+    # but the actual vite.config.ts uses 4142; using the real value).
+    ports:
+      - "${WEB_UI_HOST_PORT:-127.0.0.1:4142}:4142"
+    environment:
+      # API base URL as seen from the browser (host network)
+      VITE_ORCH_API_URL: "${VITE_ORCH_API_URL:-http://localhost:4141}"
+      VITE_LANGFUSE_UI_URL: "${VITE_LANGFUSE_UI_URL:-http://localhost:3100}"
+    depends_on:
+      orch-core:
+        condition: service_healthy
+
+volumes:
+  postgres-data:
+    driver: local

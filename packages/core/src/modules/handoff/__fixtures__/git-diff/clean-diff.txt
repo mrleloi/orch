@@ -1,0 +1,4 @@
+ src/foo.ts | 12 ++++----
+ src/bar.ts |  5 +++++
+ src/baz.ts | 30 ++++++++++++++++--------------
+ 3 files changed, 47 insertions(+), 19 deletions(-)

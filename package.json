@@ -1,0 +1,46 @@
+{
+  "name": "orch",
+  "version": "2.2.0",
+  "private": true,
+  "description": "Personal Claude Code orchestration daemon — schedule, spawn, monitor, notify, hand off Claude Code sessions across managed projects.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.10.0",
+    "pnpm": ">=9.0.0"
+  },
+  "packageManager": "pnpm@9.12.0",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "pnpm -r run build",
+    "test": "pnpm -r run test",
+    "typecheck": "pnpm -r run typecheck",
+    "lint": "pnpm -r run lint",
+    "dev": "pnpm --filter @orch/core run start:dev",
+    "dev:telegram": "pnpm --filter @orch/telegram run dev",
+    "dev:web": "pnpm --filter @orch/web run dev",
+    "build:telegram": "pnpm --filter @orch/telegram run build",
+    "build:web": "pnpm --filter @orch/web run build",
+    "check:invariants": "node scripts/check-invariants.mjs",
+    "test:hooks": "vitest run --config tests/vitest.config.ts",
+    "prepare": "husky",
+    "skills:validate": "tsx scripts/skills-validate.ts"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^20.0.0",
+    "husky": "^9.1.7",
+    "js-yaml": "^4.1.1",
+    "lint-staged": "^16.4.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.0",
+    "zod": "^4.3.6"
+  },
+  "lint-staged": {
+    "packages/**/*.ts": [
+      "pnpm -r run lint --if-present"
+    ]
+  }
+}

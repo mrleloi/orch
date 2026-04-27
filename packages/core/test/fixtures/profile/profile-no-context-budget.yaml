@@ -1,0 +1,7 @@
+projectId: test-project-defaults
+rootPath: /tmp/test-project-defaults
+sessionTypes:
+  - name: impl
+    promptTemplate: "Implement: {{plan}}"
+ccsProfile: personal
+# contextBudget block omitted — defaults (200k/230k) should apply

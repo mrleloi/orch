@@ -1,0 +1,2 @@
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"continue"}]},"uuid":"u1"}
+{"type":"assistant","message":{"role":"assistant","usage":{"input_tokens":183000,"cache_read_input_tokens":2000},"content":[{"type":"text","text":"I am approaching 200K tokens. Real token count is above the soft limit threshold of 180K. Wind-down is legitimately triggered."}]},"stop_reason":"end_turn","uuid":"a1"}

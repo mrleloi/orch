@@ -1,0 +1,225 @@
+// Orch — Prisma schema for SQLite persistence
+//
+// Table layout mirrors the domain entity shapes (packages/core/src/domain/).
+// The db-module adapter (orch-store.service.ts) maps Prisma rows ↔ domain types.
+//
+// Naming rules:
+//   - Model names: PascalCase (Prisma convention)
+//   - Column names: camelCase (matches TS interface fields where possible)
+//   - No project-specific values or defaults (I-2)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// ── Project ─────────────────────────────────────────────────────────────────
+// Stores the resolved, validated profile for each managed project registered
+// with Orch. profileJson holds the JSON-serialised Profile struct (post-zod).
+
+model Project {
+  id          String   @id @default(cuid())
+  rootPath    String   @unique
+  profileJson String // JSON-serialised Profile (validated at write time)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  sessions   Session[]
+  queueItems QueueItem[]
+}
+
+// ── Session ──────────────────────────────────────────────────────────────────
+// Mirrors domain/session.ts Session interface exactly.
+// Optional fields use nullable columns.
+
+model Session {
+  id       String @id @default(cuid())
+  project  Project @relation(fields: [projectId], references: [id])
+  projectId String
+
+  sessionKey String
+
+  // Matches SessionState enum values (stored as strings)
+  state String @default("Idle")
+
+  model           String?
+  claudeSessionId String?
+  tokensUsed      Int?
+  endReason       String?
+  worktreePath    String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  startedAt DateTime?
+  endedAt   DateTime?
+
+  queueItems    QueueItem[]
+  hookEvents    HookEvent[]
+  handoffsFrom  HandoffContext[] @relation("FromSession")
+  handoffsTo    HandoffContext[] @relation("ToSession")
+
+  @@index([projectId, state])
+  @@index([claudeSessionId])
+}
+
+// ── QueueItem ─────────────────────────────────────────────────────────────────
+// Mirrors domain/queue-item.ts QueueItem interface.
+// `payload` stores the plan frontmatter as JSON string.
+// `sessionKey` matches the QueueItem.sessionKey field (project key, not session FK).
+
+model QueueItem {
+  id        String  @id @default(cuid())
+  project   Project @relation(fields: [projectId], references: [id])
+  projectId String
+
+  // The session key from the plan/queue context (format: {projectId}:{type}:{threadId})
+  sessionKey String
+
+  // Matches QueueItemState enum values
+  state    String @default("Pending")
+  priority Int    @default(0)
+
+  // Dedup key: {filePath}:{mtime} — unique per enqueue (soft constraint; store checks)
+  dedupKey String
+
+  // JSON-serialised payload (plan frontmatter + resolved paths)
+  payloadJson String @default("{}")
+
+  attempts    Int @default(0)
+  maxAttempts Int @default(3)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  startedAt DateTime?
+  endedAt   DateTime?
+
+  // Nullable FK to Session (set when item is dispatched to a session)
+  session   Session? @relation(fields: [sessionId], references: [id])
+  sessionId String?
+
+  // ── Phase 5.3 — Parallelization (atomic claim) ───────────────────────────
+  // claimedBy:        worker UUID that won the atomic UPDATE; NULL when free.
+  // claimExpiresAt:   monotonic-deadline; expired claims are reclaimed by the
+  //                   on-claim sweep clause (Q4 in 5.3 architect doc).
+  claimedBy        String?
+  claimExpiresAt   DateTime?
+
+  @@unique([projectId, dedupKey])
+  @@index([projectId, state, priority, createdAt])
+  @@index([claimedBy, claimExpiresAt])  // dispatcher poll path
+}
+
+// ── HookEvent ─────────────────────────────────────────────────────────────────
+// Records every Claude Code hook POST received.
+// dedupKey enforces I-8 idempotency: unique index prevents double-insert.
+
+model HookEvent {
+  id        String  @id @default(cuid())
+  session   Session @relation(fields: [sessionId], references: [id])
+  sessionId String
+
+  eventType   String
+  receivedAt  DateTime @default(now())
+  payloadJson String // JSON-serialised hook body
+
+  // Deterministic dedup key: {sessionId}:{eventType}:{hash-or-ts}
+  // Unique index enforces I-8 at DB level.
+  dedupKey String @unique
+
+  @@index([sessionId, receivedAt])
+}
+
+// ── SessionLock ───────────────────────────────────────────────────────────────
+// DB-backed advisory lock for cross-process session serialisation (D3 fallback).
+// In-process locking uses a Promise-chain Map; this table is the multi-process layer.
+
+model SessionLock {
+  sessionKey String   @id
+  owner      String
+  expiresAt  DateTime
+
+  @@index([expiresAt])
+}
+
+// ── HandoffContext ────────────────────────────────────────────────────────────
+// Phase 3 — context handoff between sessions (context-full → new session).
+// fromSessionId is required; toSessionId is nullable until the new session starts.
+//
+// status values:
+//   READY_FOR_AUTO_SPAWN  — auto_handoff=true; queue dispatcher will consume automatically
+//   AWAITING_CONFIRM      — auto_handoff=false; operator must confirm before spawn
+//   APPLIED               — seedPrompt was threaded into the next session's spawn call
+//
+// seedPrompt: the rendered handoff text (RenderedPrompt.text). Stored in a dedicated
+// column so contextJson (structured HandoffContext blob) is never overwritten after creation.
+
+model HandoffContext {
+  id            String   @id @default(cuid())
+  fromSession   Session  @relation("FromSession", fields: [fromSessionId], references: [id])
+  fromSessionId String
+  toSession     Session? @relation("ToSession", fields: [toSessionId], references: [id])
+  toSessionId   String?
+
+  // Lifecycle status — drives queue dispatcher behaviour (CRITICAL-2/3)
+  status      String @default("READY_FOR_AUTO_SPAWN")
+
+  // Rendered handoff prompt text — dedicated column to avoid overwriting contextJson
+  seedPrompt  String @default("")
+
+  // Task 4.1 — real git commit SHA captured at session end (40-char hex).
+  // Null until SessionManager schema extension lands; non-null for new rows after 4.1.
+  commit_sha  String?
+
+  // Task 4.1 — absolute path to the session log file (YYYY-MM-DD-session-N.md).
+  // Null until SessionManager schema extension lands; non-null for new rows after 4.1.
+  session_log_path String?
+
+  createdAt   DateTime @default(now())
+  contextJson String // JSON-serialised HandoffContext blob (never mutated after create)
+
+  @@index([fromSessionId])
+  @@index([status])
+}
+
+// ── WorkerMailbox ─────────────────────────────────────────────────────────────
+// Phase 5.3 — peer messaging between concurrent workers (charter §3 v2.0).
+//
+// `read` is INTENTIONALLY a Boolean (Prisma maps to INTEGER 0/1 in SQLite).
+// Append-only in v2.0 (Q5 in 5.3 architect doc) — `archiveBefore()` ships
+// dormant for future admin command.
+
+model WorkerMailbox {
+  id         String   @id @default(cuid())
+  toWorker   String
+  fromWorker String
+  message    String
+  read       Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@index([toWorker, read, createdAt])
+}
+
+// ── OperatorActionLog ─────────────────────────────────────────────────────────
+// Immutable audit trail for every confirmed destructive operator action.
+// Written by the API layer on confirmed destructive operations (I-6).
+// actor:     "telegram:<chatId>" | "web:<tokenHash>" | "cli"
+// action:    "session.stop" | "queue.pause" | "queue.resume" | "queue.enqueue"
+// target:    session ID, queue item ID, or null if not applicable
+// confirmed: always true when the row is written (row is only written on confirmed ops)
+// traceId:   W3C traceparent trace-id from active OTEL span, if present
+
+model OperatorActionLog {
+  id        String   @id @default(cuid())
+  actor     String
+  action    String
+  target    String?
+  confirmed Boolean
+  createdAt DateTime @default(now())
+  traceId   String?
+
+  @@index([action, createdAt])
+  @@index([actor])
+}

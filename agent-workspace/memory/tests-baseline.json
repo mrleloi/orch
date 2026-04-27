@@ -1,0 +1,33 @@
+{
+  "generated_at": "2026-04-26T04:04:42.790Z",
+  "per_package": [
+    {
+      "failed": 2,
+      "name": "@orch/scripts-tests",
+      "passed": 61,
+      "skipped": 0
+    }
+  ],
+  "per_phase": [
+    {
+      "closed_at": "2026-04-26T04:02:21.265Z",
+      "notes": "Phase 5 close idempotent",
+      "phase_id": "5",
+      "tests_passed": 31,
+      "tests_total": 31
+    },
+    {
+      "closed_at": "2026-04-26T04:04:42.790Z",
+      "notes": "Phase 3 backfill",
+      "phase_id": "3",
+      "tests_passed": 61,
+      "tests_total": 63
+    }
+  ],
+  "schema_version": "1",
+  "totals": {
+    "failed": 2,
+    "passed": 61,
+    "skipped": 0
+  }
+}

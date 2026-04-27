@@ -1,0 +1,2 @@
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"continue"}]},"uuid":"u1"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"Will run pnpm test now to verify."}]},"stop_reason":"end_turn","uuid":"a1"}

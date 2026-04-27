@@ -1,0 +1,85 @@
+{
+  "_comment": "Paste the contents of the 'hooks' object below into <stockforge>/.claude/settings.json under the top-level 'hooks' key. Preserve any existing hooks already in that file. Set ORCH_HOOK_SECRET before launching Claude Code (see README.md Step 3).",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "curl -sS --max-time 3 -X POST \"http://127.0.0.1:4141/hooks/SessionStart\" -H \"Content-Type: application/json\" -H \"X-Orch-Hook-Secret: ${ORCH_HOOK_SECRET}\" -d \"{\\\"session_id\\\":\\\"${CLAUDE_PROJECT_DIR}\\\",\\\"claude_session_id\\\":\\\"${CLAUDE_SESSION_ID}\\\",\\\"model\\\":\\\"${CLAUDE_MODEL}\\\",\\\"source\\\":\\\"startup\\\"}\" || true"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "curl -sS --max-time 3 -X POST \"http://127.0.0.1:4141/hooks/SessionEnd\" -H \"Content-Type: application/json\" -H \"X-Orch-Hook-Secret: ${ORCH_HOOK_SECRET}\" -d \"{\\\"session_id\\\":\\\"${CLAUDE_PROJECT_DIR}\\\",\\\"end_reason\\\":\\\"normal\\\"}\" || true"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "curl -sS --max-time 3 -X POST \"http://127.0.0.1:4141/hooks/UserPromptSubmit\" -H \"Content-Type: application/json\" -H \"X-Orch-Hook-Secret: ${ORCH_HOOK_SECRET}\" -d \"{\\\"session_id\\\":\\\"${CLAUDE_PROJECT_DIR}\\\",\\\"prompt\\\":\\\"${CLAUDE_USER_PROMPT}\\\"}\" || true"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "curl -sS --max-time 3 -X POST \"http://127.0.0.1:4141/hooks/PreToolUse\" -H \"Content-Type: application/json\" -H \"X-Orch-Hook-Secret: ${ORCH_HOOK_SECRET}\" -d \"{\\\"session_id\\\":\\\"${CLAUDE_PROJECT_DIR}\\\",\\\"tool_name\\\":\\\"${CLAUDE_TOOL_NAME}\\\"}\" || true"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "curl -sS --max-time 3 -X POST \"http://127.0.0.1:4141/hooks/PostToolUse\" -H \"Content-Type: application/json\" -H \"X-Orch-Hook-Secret: ${ORCH_HOOK_SECRET}\" -d \"{\\\"session_id\\\":\\\"${CLAUDE_PROJECT_DIR}\\\",\\\"tool_name\\\":\\\"${CLAUDE_TOOL_NAME}\\\"}\" || true"
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "curl -sS --max-time 3 -X POST \"http://127.0.0.1:4141/hooks/PreCompact\" -H \"Content-Type: application/json\" -H \"X-Orch-Hook-Secret: ${ORCH_HOOK_SECRET}\" -d \"{\\\"session_id\\\":\\\"${CLAUDE_PROJECT_DIR}\\\",\\\"compact_uuid\\\":\\\"${CLAUDE_COMPACT_UUID}\\\"}\" || true"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "curl -sS --max-time 3 -X POST \"http://127.0.0.1:4141/hooks/Stop\" -H \"Content-Type: application/json\" -H \"X-Orch-Hook-Secret: ${ORCH_HOOK_SECRET}\" -d \"{\\\"session_id\\\":\\\"${CLAUDE_PROJECT_DIR}\\\",\\\"stop_reason\\\":\\\"${CLAUDE_STOP_REASON}\\\"}\" || true"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "curl -sS --max-time 3 -X POST \"http://127.0.0.1:4141/hooks/Notification\" -H \"Content-Type: application/json\" -H \"X-Orch-Hook-Secret: ${ORCH_HOOK_SECRET}\" -d \"{\\\"session_id\\\":\\\"${CLAUDE_PROJECT_DIR}\\\",\\\"message\\\":\\\"${CLAUDE_NOTIFICATION_MESSAGE}\\\"}\" || true"
+          }
+        ]
+      }
+    ]
+  }
+}

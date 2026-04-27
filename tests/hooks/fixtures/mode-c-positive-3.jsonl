@@ -1,0 +1,2 @@
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"continue"}]},"uuid":"u1"}
+{"type":"assistant","message":{"role":"assistant","usage":{"input_tokens":158000,"cache_read_input_tokens":2000},"content":[{"type":"text","text":"Task 5.1.3 completed successfully. I have now dispatched task 5.1.4. Past 150K soft-prep, stopping here to write checkpoint and end turn for session reboot."}]},"stop_reason":"end_turn","uuid":"a1"}

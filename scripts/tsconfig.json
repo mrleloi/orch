@@ -1,0 +1,21 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "target": "ES2022",
+    "outDir": "../dist/scripts",
+    "rootDir": ".",
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "resolvePackageJsonExports": true,
+    "noEmit": true
+  },
+  "include": [
+    "./skills-validate.ts",
+    "./skills-validate.schema.ts",
+    "./audit/config-style-lint.ts",
+    "./audit/config-style-lint.spec.ts"
+  ],
+  "exclude": ["node_modules"]
+}

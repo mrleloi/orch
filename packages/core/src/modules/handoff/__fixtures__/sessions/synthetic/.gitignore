@@ -1,0 +1,5 @@
+# Generated fixtures — do not commit (large binary/text test data)
+huge-50kb.md
+over-256kb.md
+# Keep the generator source
+!_generators.ts

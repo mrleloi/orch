@@ -1,0 +1,2 @@
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"continue"}]},"uuid":"u1"}
+{"type":"assistant","message":{"role":"assistant","usage":{"input_tokens":118000,"cache_read_input_tokens":2000},"content":[{"type":"text","text":"I have completed several tasks. I am approaching 200K tokens and want to summarize progress before ending this turn. Writing checkpoint and ending turn now."}]},"stop_reason":"end_turn","uuid":"a1"}

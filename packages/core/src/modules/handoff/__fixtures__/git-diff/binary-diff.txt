@@ -1,0 +1,4 @@
+ src/assets/logo.png | Bin 0 -> 1024 bytes
+ src/assets/bg.jpg   | Bin 2048 -> 4096 bytes
+ src/main.ts         |  5 +++++
+ 2 files changed, 5 insertions(+), 0 deletions(-)

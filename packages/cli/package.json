@@ -1,0 +1,35 @@
+{
+  "name": "@orch/cli",
+  "version": "2.2.0",
+  "description": "Orch CLI — init, attach, start, stop, status commands",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "orch": "./dist/main.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint \"src/**/*.ts\"",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@inquirer/prompts": "^8.4.2",
+    "commander": "^14.0.3",
+    "js-yaml": "^4.1.1",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.18.0",
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^24.0.0",
+    "eslint": "^9.18.0",
+    "globals": "^15.0.0",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.20.0",
+    "vitest": "^2.0.0"
+  }
+}

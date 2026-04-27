@@ -1,0 +1,75 @@
+# .orch/profile.yaml — Minimal Orch integration profile for any Node.js project
+#
+# Copy this file to <your-project>/.orch/profile.yaml and adjust the values.
+# All fields are validated against ProfileSchema in packages/core/src/domain/profile.ts.
+# No secrets belong here — use environment variables.
+
+# ── Identity ───────────────────────────────────────────────────────────────────
+
+# URL-safe identifier: lowercase, hyphens allowed, no spaces.
+projectId: generic-app
+
+# Absolute path to your project root on this machine.
+# Windows example: "C:\\Users\\you\\projects\\my-app"
+# Unix example:    "/home/you/projects/my-app"
+rootPath: "/path/to/your/project"
+
+# ── Runtime ────────────────────────────────────────────────────────────────────
+
+# Name of the ccs profile to use when spawning sessions (run `ccs list` to see options).
+ccsProfile: "your-ccs-profile"
+
+# Maximum concurrent active sessions (default: 1 = serial execution).
+maxConcurrentSessions: 1
+
+# ── Session types ──────────────────────────────────────────────────────────────
+#
+# At least one session type is required.
+# promptTemplate may contain {{plan}} which is replaced with the plan file content.
+
+sessionTypes:
+  - name: impl
+    promptTemplate: |
+      You are executing an implementation task for this project.
+      Plan: {{plan}}
+
+      Follow the plan exactly. Write tests alongside the code.
+      Stage all changes. Do NOT commit unless the plan explicitly says so.
+    maxConcurrent: 1
+
+# ── Hook targets ───────────────────────────────────────────────────────────────
+#
+# These tell Orch which hook events to expect from this project.
+# The actual hook registration lives in <your-project>/.claude/settings.json —
+# see settings.json in this folder for the commands to paste there.
+# Port must match ORCH_HTTP_PORT (default 4141).
+
+hookTargets:
+  - event: SessionStart
+    url: "http://127.0.0.1:4141/hooks/SessionStart"
+  - event: Stop
+    url: "http://127.0.0.1:4141/hooks/Stop"
+  - event: SubagentStop
+    url: "http://127.0.0.1:4141/hooks/SubagentStop"
+  - event: PostToolUse
+    url: "http://127.0.0.1:4141/hooks/PostToolUse"
+
+# ── Queue sources ──────────────────────────────────────────────────────────────
+#
+# Orch watches these directories for incoming plan files (*.md).
+
+queueSources:
+  - path: "/path/to/your/project/session-plans/pending"
+    glob: "*.md"
+
+# ── Cron scheduler ─────────────────────────────────────────────────────────────
+#
+# Optional: cron-driven plan enqueue. Leave empty for manual dispatch only.
+# Format: { <name>: "<cron expression>" }
+# Example: { daily-build: "0 9 * * *" }
+cron: {}
+
+# ── Optional flags ─────────────────────────────────────────────────────────────
+
+langfuseEnabled: false
+disableSecretRedaction: false

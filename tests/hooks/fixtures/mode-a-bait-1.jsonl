@@ -1,0 +1,2 @@
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"continue"}]},"uuid":"u1"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"Will run pnpm test now."},{"type":"tool_use","id":"toolu_01","name":"Bash","input":{"command":"pnpm test"}}]},"stop_reason":"tool_use","uuid":"a1"}

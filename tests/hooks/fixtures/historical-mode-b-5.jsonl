@@ -1,0 +1,3 @@
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"continue"}]},"uuid":"hb5-u1"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"Now running code-quality-reviewer for session 5.1 final check. Awaiting reviewer output."},{"type":"tool_use","id":"toolu_hb5_01","name":"Agent","input":{"prompt":"Code quality review for Phase 5.1","run_in_background":true}}]},"uuid":"hb5-a1"}
+{"type":"error","error":{"type":"overloaded_error","message":"Overloaded"},"request_id":"req_hb5_HistE005"}

@@ -1,0 +1,9 @@
+projectId: test-project
+rootPath: /tmp/test-project
+sessionTypes:
+  - name: impl
+    promptTemplate: "Implement: {{plan}}"
+ccsProfile: personal
+contextBudget:
+  warnAtTokens: 50000
+  forceHandoffAtTokens: 60000

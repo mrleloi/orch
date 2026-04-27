@@ -1,0 +1,45 @@
+{
+  "_comment": "Paste the contents of the 'hooks' object below into <your-project>/.claude/settings.json under the top-level 'hooks' key. Preserve any existing hooks already in that file.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/orch-receiver.sh\" SessionStart"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/orch-receiver.sh\" Stop"
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/orch-receiver.sh\" SubagentStop"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/orch-receiver.sh\" PostToolUse"
+          }
+        ]
+      }
+    ]
+  }
+}

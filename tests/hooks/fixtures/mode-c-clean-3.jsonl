@@ -1,0 +1,2 @@
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"continue"}]},"uuid":"u1"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"I am approaching 200K tokens. The .wind-down marker is present so this is a legitimate end-of-session scenario, not premature stopping."}]},"stop_reason":"end_turn","uuid":"a1"}

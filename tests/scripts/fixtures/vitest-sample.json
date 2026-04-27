@@ -1,0 +1,50 @@
+{
+  "numTotalTestSuites": 2,
+  "numPassedTestSuites": 2,
+  "numFailedTestSuites": 0,
+  "numPendingTestSuites": 0,
+  "numTotalTests": 7,
+  "numPassedTests": 6,
+  "numFailedTests": 1,
+  "numPendingTests": 0,
+  "numTodoTests": 0,
+  "snapshot": {
+    "added": 0,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0
+  },
+  "startTime": 1700000000000,
+  "success": false,
+  "testResults": [
+    {
+      "name": "/repo/packages/core/src/modules/foo.spec.ts",
+      "status": "passed",
+      "message": "",
+      "startTime": 1700000000100,
+      "endTime": 1700000000500,
+      "assertionResults": [
+        { "status": "passed", "ancestorTitles": ["Foo"], "fullName": "Foo test 1", "title": "test 1", "duration": 10, "failureMessages": [], "meta": {} },
+        { "status": "passed", "ancestorTitles": ["Foo"], "fullName": "Foo test 2", "title": "test 2", "duration": 10, "failureMessages": [], "meta": {} },
+        { "status": "failed",  "ancestorTitles": ["Foo"], "fullName": "Foo test 3", "title": "test 3", "duration": 10, "failureMessages": ["expected 1 to be 2"], "meta": {} }
+      ]
+    },
+    {
+      "name": "/repo/packages/telegram/src/modules/bar.spec.ts",
+      "status": "passed",
+      "message": "",
+      "startTime": 1700000000600,
+      "endTime": 1700000001000,
+      "assertionResults": [
+        { "status": "passed", "ancestorTitles": ["Bar"], "fullName": "Bar test 1", "title": "test 1", "duration": 5, "failureMessages": [], "meta": {} },
+        { "status": "passed", "ancestorTitles": ["Bar"], "fullName": "Bar test 2", "title": "test 2", "duration": 5, "failureMessages": [], "meta": {} },
+        { "status": "passed", "ancestorTitles": ["Bar"], "fullName": "Bar test 3", "title": "test 3", "duration": 5, "failureMessages": [], "meta": {} },
+        { "status": "passed", "ancestorTitles": ["Bar"], "fullName": "Bar test 4", "title": "test 4", "duration": 5, "failureMessages": [], "meta": {} }
+      ]
+    }
+  ]
+}
