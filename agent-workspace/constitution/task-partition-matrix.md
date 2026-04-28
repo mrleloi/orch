@@ -190,31 +190,36 @@ Hybrid rows are intentionally rare (3 of 66 = 4.5%) — they exist where pure de
 
 Explicit IMPL list 8.4.7 task-implementer reads. Each row pins a planned script to a task_id from §3.
 
-| script_path (planned) | task_id | trigger frequency | brief description | est LOC |
-|---|---|---|---|---|
-| scripts/verify/post-phase.sh | T-030 | per-phase | composite verify: T-001..T-004 + T-021 + T-032 + T-033 + T-039; exit non-zero on any sub-check failure | 90 |
-| scripts/verify/post-n-sessions.sh | T-031 | per-N-sessions | composite drift+lint+citation: T-011 + T-021 + T-032 + T-037; idempotent re-run | 70 |
-| scripts/verify/drift-check.sh | T-032 | per-phase | charter-vs-impl semantic spot-check; grep heuristic over PROJECT_CHARTER.md cites | 60 |
-| scripts/audit/hook-latency-budget.sh | T-033 | per-phase | parse `agent-workspace/telemetry/*.jsonl` hook duration; assert p99 < 200ms; F-5 closure | 40 |
-| scripts/audit/n6-72h-launcher.sh | T-034 | ad-hoc | nohup detached `measure-rss.sh --duration-sec 259200`; writes PID + start-ts; F-1 closure | 30 |
-| scripts/audit/n6-72h-status.sh | T-035 | ad-hoc | reads PID file; emits progress + RSS snapshot every N hours; F-1 closure | 35 |
-| scripts/audit/charter-coherence-spot-check.sh | T-036 | per-phase | iterate phase-N-complete files; grep charter principle cites; emit evidence table | 60 |
-| scripts/audit/dependency-freshness.sh | T-037 | per-N-sessions | `npm outdated --json` + git log dependency drift; emit drift-flag | 50 |
-| scripts/audit/profile-vs-settings-diff.sh | T-038 | per-substage | parse profile `.md` `## Events covered` table + `settings.json` hook entries; assert symmetric | 80 |
-| scripts/audit/hook-coverage.sh | T-039 | per-phase | enumerate Claude Code hook events vs `settings.json` entries; emit coverage % | 50 |
-| scripts/audit/concrete-adapter-import-lint.sh | T-040 | per-substage | grep `new ClaudeCodeAdapter\\|new CodexAdapter` in `packages/core/src/domain/`; F-6 mitigation | 25 |
-| packages/core/src/dispatch/recorder.ts (edits) | T-041 | per-tool-use | tool_use_id correlation field emit; CF-21 fix per Decision 026; F-4 closure | 50-80 |
-| scripts/audit/dispatch-pairing-rate.sh | T-042 | per-N-sessions | parse `dispatch.jsonl`; compute (DISPATCHED ∩ COMPLETED)/total; F-4 follow-up telemetry | 55 |
-| scripts/audit/oss-readiness.sh | T-043 | per-phase | check LICENSE + CONTRIBUTING.md + CODE_OF_CONDUCT.md + SECURITY.md + .github/ISSUE_TEMPLATE/ exist | 45 |
-| scripts/audit/npm-pack-check.sh | T-044 | per-phase | `npm pack --dry-run` + assert tarball <5MB | 30 |
-| scripts/dogfood/run-self-task.ts | T-045 | per-substage | queue file → dispatcher entrypoint; emits OTEL trace; SC-44 closure | 110 |
-| scripts/utilities/emit-spec-opt-out.sh | T-046 | ad-hoc | template fill for G.8 spec-opt-out skeleton | 25 |
-| scripts/audit/substage-parallelism-flag.sh | T-047 | per-substage | parse master-plan §3 substage table; emit parallelism flag column; G.7 closure | 35 |
-| scripts/dispatch/effort-prepend.sh | T-048 | per-tool-use | reads envelope JSON `effort_mode`; prepends `/effort <mode>` to prompt; SC-47 closure | 30 |
-| scripts/audit/architect-spec-vs-reality-loc.sh | T-050 (hybrid) | per-substage | `wc -l` on closest analog; assert spec estimate within [0.5×, 1.5×]; Mandate F gate | 45 |
+| script_path (planned) | task_id | trigger frequency | brief description | est LOC | status |
+|---|---|---|---|---|---|
+| scripts/verify/post-phase.sh | T-030 | per-phase | composite verify: T-001..T-004 + T-021 + T-032 + T-033 + T-039; exit non-zero on any sub-check failure | 90 | SHIPPED (9.4) |
+| scripts/verify/post-n-sessions.sh | T-031 | per-N-sessions | composite drift+lint+citation: T-011 + T-021 + T-032 + T-037; idempotent re-run | 70 | SHIPPED (9.4) |
+| scripts/verify/drift-check.sh | T-032 | per-phase | charter-vs-impl semantic spot-check; grep heuristic over PROJECT_CHARTER.md cites | 60 | SHIPPED (9.4) |
+| scripts/audit/hook-latency-budget.sh | T-033 | per-phase | parse `agent-workspace/telemetry/*.jsonl` hook duration; assert p99 < 200ms; F-5 closure | 40 | SHIPPED (9.4) |
+| scripts/audit/n6-72h-launcher.sh | T-034 | ad-hoc | nohup detached `measure-rss.sh --duration-sec 259200`; writes PID + start-ts; F-1 closure | 30 | SHIPPED (9.7) |
+| scripts/audit/n6-72h-status.sh | T-035 | ad-hoc | reads PID file; emits progress + RSS snapshot every N hours; F-1 closure | 35 | SHIPPED (9.7) |
+| scripts/audit/charter-coherence-spot-check.sh | T-036 | per-phase | iterate phase-N-complete files; grep charter principle cites; emit evidence table | 60 | SHIPPED (9.4) |
+| scripts/audit/dependency-freshness.sh | T-037 | per-N-sessions | `npm outdated --json` + git log dependency drift; emit drift-flag | 50 | SHIPPED (9.7) |
+| scripts/audit/profile-vs-settings-diff.sh | T-038 | per-substage | parse profile `.md` `## Events covered` table + `settings.json` hook entries; assert symmetric | 80 | SHIPPED (9.7) |
+| scripts/audit/hook-coverage.sh | T-039 | per-phase | enumerate Claude Code hook events vs `settings.json` entries; emit coverage % | 50 | SHIPPED (9.4) |
+| scripts/audit/concrete-adapter-import-lint.sh | T-040 | per-substage | grep `new ClaudeCodeAdapter\\|new CodexAdapter` in `packages/core/src/domain/`; F-6 mitigation | 25 | SHIPPED (9.4) |
+| packages/core/src/dispatch/recorder.ts (edits) | T-041 | per-tool-use | tool_use_id correlation field emit; CF-21 fix per Decision 026; F-4 closure | 50-80 | DEFERRED-V2.5 (CF-33 blocked SC-39 gate) |
+| scripts/audit/dispatch-pairing-rate.sh | T-042 | per-N-sessions | parse `dispatch.jsonl`; compute (DISPATCHED ∩ COMPLETED)/total; F-4 follow-up telemetry | 55 | SHIPPED (9.4) |
+| scripts/audit/oss-readiness.sh | T-043 | per-phase | check LICENSE + CONTRIBUTING.md + no hardcoded secrets + pkg names not project-specific | 45 | SHIPPED (9.7) |
+| scripts/audit/npm-pack-check.sh | T-044 | per-phase | `npm pack --dry-run` + assert tarball <5MB | 30 | SHIPPED (9.7) |
+| scripts/dogfood/run-self-task.ts | T-045 | per-substage | queue file → dispatcher entrypoint; emits OTEL trace; SC-44 closure | 110 | SHIPPED (9.1) |
+| scripts/audit/emit-spec-opt-out.sh | T-046 | ad-hoc | checks emit-hook opt-out: configurations claiming no-emit have no spurious telemetry hooks | 25 | SHIPPED (9.7) |
+| scripts/audit/substage-parallelism-flag.sh | T-047 | per-substage | parse routing brief parallel_safe_with; detect file-edit collisions; G.7 closure | 35 | SHIPPED (9.7) |
+| scripts/audit/effort-prepend.sh | T-048 | per-tool-use | checks dispatch.jsonl DISPATCHED rows for `effort` field annotation; Decision 027 §5 | 30 | SHIPPED (9.7) |
+| scripts/audit/architect-spec-vs-reality-loc.sh | T-050 (hybrid) | per-substage | `wc -l` on session LOC reports; flag outliers >1.5× or <0.5× spec estimate; Mandate F gate | 45 | SHIPPED (9.7) |
+
+> Note: T-048 `effort-prepend.sh` shipped to `scripts/audit/` rather than `scripts/dispatch/` per partition-matrix §7 path;
+> the audit location is more appropriate since this is a detection/reporting script, not a dispatch runtime script.
+> T-046 `emit-spec-opt-out.sh` shipped to `scripts/audit/` rather than `scripts/utilities/` per same reasoning.
 
 **Total planned scripts**: 20 (19 deterministic + 1 hybrid script-side; T-051 extends existing `rollup-telemetry.ts` and is not a new file).
 **Total est LOC**: ~975 (mid-estimate; range 850-1100). Within 8.4.7 budget envelope (sonnet /effort medium per §11 plan §11 effort routing).
+**Substage 9.7 shipping status**: 10 scripts SHIPPED (T-034, T-035, T-037, T-038, T-043, T-044, T-046, T-047, T-048, T-050). T-041 DEFERRED-V2.5.
 
 8.4.7 task-implementer reads this table verbatim as the IMPL backlog. Each row's `est LOC` informs sub-task split decisions; rows ≤50 LOC batch into a single sub-task; rows ≥100 LOC stand alone.
 

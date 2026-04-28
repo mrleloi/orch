@@ -1,7 +1,7 @@
 ---
 name: otel-tracing
 description: Use when editing `packages/core/src/modules/tracing/**` or any code that creates spans, records metrics, propagates TRACEPARENT, or reads/writes OTEL env vars. Also use when the user mentions Langfuse, SigNoz, OTLP, or trace export.
-tools: [Read, Bash, Grep, Edit]
+allowed-tools: [Read, Bash, Grep, Edit]
 archetype: reference
 ---
 

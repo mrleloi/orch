@@ -5,14 +5,14 @@
 Creating or editing `*.module.ts`, `*.service.ts`, `*.controller.ts`, `*.repository.ts`,
 dependency injection setup, or module-level tests in `packages/core/`.
 
-## Expected Behavior
+## Expected behavior (PASS)
 
 Skill activates and guides module construction so that:
 - Feature internals are NOT leaked via `export *` barrels
 - Cross-feature communication routes through EventBus or shared infra modules only
 - Adapter wiring uses `Symbol.for(...)` DI tokens, never raw concrete class identifiers
 
-## Failure Modes
+## Named failure modes
 
 - F1: `export *` barrel in a feature module `index.ts` exposes private internals (Anti-Pattern #1)
 - F2: Circular module import across feature modules instead of using EventBus (Anti-Pattern #2)

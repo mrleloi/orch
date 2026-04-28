@@ -1,0 +1,14 @@
+{
+  "sample_date": "2026-04-27",
+  "source_file": "agent-workspace/memory/dispatch.jsonl",
+  "total_lines": 99,
+  "dispatched": 1,
+  "completed": 98,
+  "matched_direct": 0,
+  "pairing_rate": 0.0,
+  "gate_threshold_pairs": 50,
+  "gate_threshold_match_rate_fallback": 0.85,
+  "gate_threshold_match_rate_direct": 0.40,
+  "gate_verdict": "FAIL",
+  "notes": "dispatch.jsonl contains 99 lines: 1 DISPATCHED event (dispatch_id=toolu_smoke_01, agent_type=task-implementer, smoke-test) and 98 COMPLETED events (all agent_type=unknown-agent). Direct matching by dispatch_id yields 0 pairs because DISPATCHED uses id=toolu_smoke_01 while COMPLETED events use hex ids (aaa80398aa10d20b8, etc.) from a different ID space — the recorder seam does not correlate tool_use_id from the Claude API with the COMPLETED dispatch_id. Fallback heuristic (same parent_session_id + sequential correlation) would give 0 named pairs because the single DISPATCHED event has parent_session_id=sess-smoke while all COMPLETED events have UUIDs. The data shows the dispatch recorder's pairing gap: DISPATCHED events are only recorded for programmatic test dispatches (smoke test), while COMPLETED events flood from the hook recorder for actual sessions. This is the CF-21 structural gap. Gate verdict: FAIL on all three thresholds (pairs=0 < 50 required; match_rate_direct=0.00 < 0.40; match_rate_fallback=0.00 < 0.85). Decision 034 must account for this failure."
+}

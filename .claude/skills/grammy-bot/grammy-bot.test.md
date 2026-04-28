@@ -9,14 +9,14 @@ Any task in `packages/telegram/` involving:
 - Outbound notifications
 - Bot startup or shutdown lifecycle
 
-## Expected Behavior
+## Expected behavior (PASS)
 
 Skill activates and every `bot.command(...)` is preceded by `bot.use(authMiddleware)` in
 `createBot()`. Destructive commands set `ctx.session.pendingConfirmation` before executing
 (I-6 confirmation flow). `packages/telegram/` imports nothing from `@orch/core`, `node:fs`
 write helpers, or `prisma` client directly -- all external access uses `orchClient` HTTP.
 
-## Failure Modes
+## Named failure modes
 
 - F1: auth check missing on commands -- security bug; `bot.command()` registered before `bot.use(authMiddleware)`
 - F2: destructive command executes without setting `ctx.session.pendingConfirmation` -- I-6 invariant violation

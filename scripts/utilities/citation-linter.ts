@@ -6,10 +6,15 @@ import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 
-// Claude Code built-in tool event names — not custom scripts; exempt from missing-file check.
+// Claude Code built-in tool/event names — not custom scripts; exempt from missing-file check.
+// Includes both hook event lifecycle names (PreToolUse, PostToolUse, SessionStart, etc.) and
+// tool names that appear as the `name` field within those events (Bash, Read, WebFetch, etc.).
+// CF-25 dedup: WebFetch and TaskList added v2.5 (Phase 10.2) — these are built-in Claude Code
+// tool names that appear in component-rollup telemetry as hook rows but have no scripts/hooks/ file.
 export const BUILTIN_HOOK_EVENTS: ReadonlySet<string> = new Set([
   'Bash','Read','Write','Edit','Grep','Glob','Agent','Task','TaskUpdate','TaskCreate',
   'TaskRead','TaskWrite','SessionStart','SessionEnd','ToolSearch','Skill','Stop','PreToolUse','PostToolUse',
+  'WebFetch','TaskList',
 ]);
 export const SENTINEL_NAMES: ReadonlySet<string> = new Set(['unknown-agent','unknown-command','unknown-skill','unknown-hook']);
 export const COMPONENT_RESOLUTION_MAP: Record<string,(n:string)=>string> = { // Decision 024 verbatim

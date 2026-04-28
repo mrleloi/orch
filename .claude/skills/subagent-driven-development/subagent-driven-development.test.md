@@ -6,14 +6,14 @@ Session plan exists with 3+ tasks; OR session_type=MULTI_TASK_IMPL; OR FOCUSED_I
 tasks touch independent modules. Invoked even at 1% chance of applicability. Not optional,
 not rationalizable away.
 
-## Expected Behavior
+## Expected behavior (PASS)
 
 Skill activates → orchestrator dispatches one task-implementer per task with
 `run_in_background=true`. Each implementer is followed by spec-compliance-reviewer then
 code-quality-reviewer (two-stage gate, fresh context each). Orchestrator transcript contains
 ONLY `Agent` and `Read` tool_uses — no code writing in the main session.
 
-## Failure Modes
+## Named failure modes
 
 - F1: all tasks executed in one subagent ("easier to just do all tasks together") — context
   pollution across task boundaries; implementer assumptions bleed between tasks

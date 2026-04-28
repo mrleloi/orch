@@ -6,14 +6,14 @@ Editing `packages/core/src/modules/tracing/**`; OR creating spans, recording
 metrics, propagating TRACEPARENT, reading/writing OTEL env vars; OR user
 mentions Langfuse, SigNoz, OTLP, or trace export.
 
-## Expected Behavior
+## Expected behavior (PASS)
 
 Skill activates and `withSpan` helper is used (auto-end via try/finally).
 Subprocess spawns include `TRACEPARENT`, `OTEL_SERVICE_NAME`, and
 `CLAUDE_CODE_ENABLE_TELEMETRY` env vars. Span attributes use canonical
 `gen_ai.usage.*` names. NO prompts or secrets recorded as attributes.
 
-## Failure Modes
+## Named failure modes
 
 - F1: span created without `withSpan` — manual `startSpan` without matching
   `end()` causes a memory leak (Anti-Pattern #1)

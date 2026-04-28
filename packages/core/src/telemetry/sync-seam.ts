@@ -17,6 +17,8 @@
  * (Decision 031 §"Endpoint").
  */
 
+import { EventRateCounter } from './event-rate-counter.js';
+
 // ── Public types ─────────────────────────────────────────────────────────────
 
 /**
@@ -104,12 +106,21 @@ export class NoOpSink implements TelemetrySink {
  *
  * Wire format (v2.4): NDJSON over HTTPS POST per Decision 031 §"Wire format".
  * One JSON event per line; server consumes line-by-line.
+ *
+ * CF-31 (v2.4): emits a startup banner to stderr on instantiation so operators
+ * have a clear audit trail that data forwarding is active. Default OFF path uses
+ * NoOpSink and never reaches this constructor, so no banner is emitted when disabled.
  */
 export class HttpsNdjsonSink implements TelemetrySink {
   private readonly endpoint: string;
 
-  constructor(endpoint: string) {
+  constructor(endpoint: string, batchSize = 1) {
     this.endpoint = endpoint;
+    // CF-31: Startup banner — emit once to stderr when opt-in path instantiates this sink.
+    // Default OFF path uses NoOpSink and never reaches this constructor.
+    process.stderr.write(
+      `[telemetry] HttpsNdjsonSink ENABLED: target=${endpoint} batch=${batchSize}\n`,
+    );
   }
 
   send(event: TelemetryEvent): Promise<void> {
@@ -143,6 +154,7 @@ export class HttpsNdjsonSink implements TelemetrySink {
 export class TelemetrySyncSeam {
   private readonly enabled: boolean;
   private readonly sink: TelemetrySink;
+  private readonly eventRate: EventRateCounter;
 
   constructor(opts?: TelemetrySyncOptions) {
     // Resolve enabled: explicit opt wins; then env var; then default OFF.
@@ -161,6 +173,9 @@ export class TelemetrySyncSeam {
     } else {
       this.sink = new NoOpSink();
     }
+
+    // SC-28: observational event-rate counter (counts ALL emit() calls regardless of enabled state).
+    this.eventRate = new EventRateCounter();
   }
 
   /**
@@ -173,6 +188,10 @@ export class TelemetrySyncSeam {
    * Decision 031 §"Consequences" 8: "default OFF / failures non-blocking".
    */
   async emit(event: TelemetryEvent): Promise<void> {
+    // SC-28: count ALL observed events BEFORE the enabled guard so the counter
+    // measures observed event volume independent of forwarding state.
+    this.eventRate.record();
+
     if (!this.enabled) {
       return;
     }
@@ -192,5 +211,10 @@ export class TelemetrySyncSeam {
    */
   isEnabled(): boolean {
     return this.enabled;
+  }
+
+  /** SC-28: events seen by emit() in last 60 s. Observational — does not affect wire format. */
+  getEventRate(): { count: number; ratePerSec: number } {
+    return { count: this.eventRate.count(), ratePerSec: this.eventRate.rate() };
   }
 }

@@ -1,7 +1,7 @@
 ---
 name: spawned-session-mode
 description: Use whenever checking env ORCH_SPAWNED to branch interactive vs autonomous behavior. Applies to every command, subagent, and skill that might prompt the user. Core mechanism for orchestrator-driven autonomous execution.
-tools: [Read, Write]
+allowed-tools: [Read, Write]
 archetype: discipline
 model: sonnet
 ---
@@ -69,6 +69,32 @@ budget_consumed: NNK / NNNK
 ```
 
 Orchestrator parses this to decide the next hop.
+
+**CRITICAL**: The YAML completion block MUST be the LAST content in the final assistant message. The orchestrator parses the trailing YAML; any prose after the closing `---` will be silently discarded or cause parse failure.
+
+## Large-output verifier protocol
+
+When a spawned session is forbidden (by system-reminder or CLAUDE.md) from writing summary/findings/analysis `.md` files, the session MUST return findings **inline in the final assistant message** — not by writing a separate file. The completion YAML block still appears at the end of that same message.
+
+Pattern:
+1. Write your findings/analysis as prose text in the assistant message body.
+2. Immediately follow with the YAML completion block (no prose after the `---` close).
+3. Do NOT create `findings.md`, `analysis.md`, `summary.md`, or equivalent files to work around the restriction — inline prose IS the output.
+
+This rule applies whenever the system-reminder contains "Do NOT Write report/summary/findings/analysis .md files" (current CLAUDE.md guidance for subagent invocations).
+
+## Forbidden Tools (when ORCH_SPAWNED=true)
+
+The following are **NEVER** permitted in a spawned session. Violations block the orchestrator loop.
+
+| Forbidden | Reason |
+|---|---|
+| `AskUserQuestion` | Nobody is listening; daemon blocks forever |
+| Any modal confirmation prompt ("Should I proceed?", "Are you sure?") | Same — daemon cannot answer |
+| Interactive stdin read | Blocks with no timeout |
+| Writing separate summary/findings `.md` files when CLAUDE.md prohibits it | Violates system-reminder; use inline prose instead |
+
+**Escalation instead of asking**: if you hit true ambiguity that requires human judgment, write `agent-workspace/memory/escalation.md` and emit `status: ESCALATED`. Do NOT ask.
 
 ## Red Flags — STOP
 

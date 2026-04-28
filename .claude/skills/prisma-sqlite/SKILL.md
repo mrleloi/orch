@@ -1,7 +1,7 @@
 ---
 name: prisma-sqlite
 description: Use when editing `prisma/schema.prisma`, any repository class under `packages/core/`, migration files, or when the user mentions WAL mode, SQLite concurrency, or db locking.
-tools: [Read, Bash, Grep, Edit]
+allowed-tools: [Read, Bash, Grep, Edit]
 archetype: reference
 ---
 

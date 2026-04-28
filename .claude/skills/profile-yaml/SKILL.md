@@ -1,7 +1,7 @@
 ---
 name: profile-yaml
 description: Use when editing `.orch/profile.yaml`, the profile zod schema, or any profile-loader / project-registry code that parses or validates profiles.
-tools: [Read, Bash, Edit]
+allowed-tools: [Read, Bash, Edit]
 archetype: reference
 ---
 

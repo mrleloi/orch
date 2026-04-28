@@ -7,7 +7,7 @@ Editing .orch/profile.yaml, the profile zod schema
 `ProjectRegistryService`, or any code that reads, parses, or
 validates profile files.
 
-## Expected Behavior
+## Expected behavior (PASS)
 
 Skill activates and every `readFileSync(...profile.yaml...)` call is
 followed by `loadProfile(` or `profileSchema.parse(` within 5 lines
@@ -15,7 +15,7 @@ followed by `loadProfile(` or `profileSchema.parse(` within 5 lines
 in full. Hot-reloaded profile lives in an `@Injectable` service field,
 not module-scope mutable state (I-14 satisfied).
 
-## Failure Modes
+## Named failure modes
 
 - F1: YAML read without `zod.parse` — raw object returned as `any`,
   untyped leak bypasses schema enforcement (Anti-Pattern #1, I-10 violation)

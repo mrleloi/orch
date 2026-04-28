@@ -1,0 +1,12 @@
+{
+  "sample_date": "2026-04-27",
+  "source_file": "agent-workspace/memory/component-telemetry.jsonl",
+  "total_events": 6558,
+  "total_agent_events": 162,
+  "unknown_agent_events": 162,
+  "unknown_agent_fraction": 1.0,
+  "non_unknown_agents_seen": [],
+  "gate_threshold": 0.30,
+  "gate_verdict": "FAIL",
+  "notes": "All 162 agent-type events have component_name=unknown-agent. No named agents (e.g. task-implementer, master-planner) have produced telemetry events with their canonical name. The hook-based recorder (dispatch-jsonl-recorder.sh) captures dispatch events in dispatch.jsonl with agent_type=unknown-agent as the fallback when the spawned agent does not self-report a component_name via the telemetry seam. This means the SC-39 artifact 2 gate (<0.30 unknown-agent fraction) FAILS: fraction=1.00 >> 0.30 threshold. Decision 034 must account for this failure. No non-unknown agents observed in component-telemetry.jsonl agent bucket."
+}

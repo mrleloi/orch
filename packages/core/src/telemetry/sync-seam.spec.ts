@@ -21,6 +21,7 @@ import {
   type TelemetryEvent,
   type TelemetrySink,
 } from './sync-seam.js';
+// SC-28: EventRateCounter is imported transitively through sync-seam; no direct import needed here.
 
 // ── Fixture ───────────────────────────────────────────────────────────────────
 
@@ -162,7 +163,23 @@ describe('TelemetrySyncSeam — graceful degradation', () => {
   });
 });
 
-// ── Test 8: ISO 8601 timestamp is preserved end-to-end ───────────────────────
+// ── Test 8 (SC-28): getEventRate() counts all observed events ─────────────────
+
+describe('TelemetrySyncSeam — SC-28 getEventRate()', () => {
+  it('getEventRate().count === 3 after 3 emit() calls (disabled seam)', async () => {
+    const seam = new TelemetrySyncSeam({ enabled: false });
+    await seam.emit(makeEvent());
+    await seam.emit(makeEvent());
+    await seam.emit(makeEvent());
+    const result = seam.getEventRate();
+    // Counter records BEFORE the disabled-guard; all 3 events must be counted.
+    expect(result.count).toBe(3);
+    expect(typeof result.ratePerSec).toBe('number');
+    expect(result.ratePerSec).toBeGreaterThanOrEqual(0);
+  });
+});
+
+// ── Test 9: ISO 8601 timestamp is preserved end-to-end ───────────────────────
 
 describe('TelemetrySyncSeam — timestamp passthrough', () => {
   it('preserves the caller-supplied ISO 8601 timestamp verbatim', async () => {

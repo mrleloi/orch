@@ -7,13 +7,13 @@
 - Designing a subprocess or hook contract without a clear precedent in `agent-workspace/research/`
 - User asks "how should we do X" where X touches external behavior or an unfamiliar library
 
-## Expected Behavior
+## Expected behavior (PASS)
 
 Skill blocks Edit/Write tool_use. Agent opens official docs via WebFetch or context7 MCP.
 Agent writes `agent-workspace/research/<topic>.md` covering version, API shape, known issues,
 and integration decision. Integration file starts with `// Research: agent-workspace/research/<topic>.md`.
 
-## Failure Modes
+## Named failure modes
 
 - F1: Edit/Write tool_use fires before `agent-workspace/research/<topic>.md` exists (Block condition violation)
 - F2: Stale-memory rationalization accepted ("I remember how this library works") instead of opening docs

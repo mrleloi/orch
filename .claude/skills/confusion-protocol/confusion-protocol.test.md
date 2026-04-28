@@ -8,7 +8,7 @@
 - Two adapters could handle the same task — picking one without justification
 - A *feeling* of ambiguity rather than a deterministic check failure
 
-## Expected Behavior
+## Expected behavior (PASS)
 
 Skill activates -> STOP coding. Name the confusion in one sentence. Audit sources
 (charter, invariants, spec, decisions/, code precedent). If interactive: ask user.
@@ -16,7 +16,7 @@ If ORCH_SPAWNED=true: write `decisions/NNN-*.md` with options, decision, rationa
 reversibility, and proceed. If sources conflict OR reversibility=hard: write
 `escalation.md` and HALT.
 
-## Failure Modes
+## Named failure modes
 
 - F1: silent guess — assistant proceeds without writing decision log or escalation.md
 - F2: TODO comment substituted for decision log (Red Flag: "TODOs rot; confusion-protocol demands action now")

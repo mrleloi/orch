@@ -1,0 +1,22 @@
+{
+  "phase": "10",
+  "measured_at": "2026-04-28T00:00:00Z",
+  "source_file": "agent-workspace/memory/dispatch.jsonl",
+  "dispatched_count": 12,
+  "completed_count": 136,
+  "paired_count": 0,
+  "pairing_rate": 0.0,
+  "target_threshold": 0.40,
+  "sample_size": 12,
+  "sample_size_target": 50,
+  "gate_verdict": "INSUFFICIENT_VOLUME",
+  "phase_9_baseline_pairing_rate": 0.0,
+  "phase_9_baseline_dispatched": 1,
+  "phase_9_baseline_completed": 98,
+  "delta_dispatched": 11,
+  "delta_completed": 38,
+  "notes": "Phase 10 has 12 DISPATCHED rows (up from 1 in Phase 9) and 136 COMPLETED rows (up from 98). Pairing rate remains 0.000: DISPATCHED events use toolu_*/UUID dispatch_ids while COMPLETED events use hex IDs from a different ID space — direct dispatch_id matching yields 0 pairs. The CF-21 structural seam gap is unresolved: the post-10.5.2 fixes (B-fix for TOOL_NAME bug, C-seam for named-agent recovery) did not address the DISPATCHED/COMPLETED ID space mismatch. min(dispatched,completed)=12, which is below the 50-pair sample_size_target, so gate_verdict is INSUFFICIENT_VOLUME rather than FAIL. However, even if volume were sufficient, pairing_rate=0.000 would produce a hard FAIL. Decision 034 prerequisite 1 (CF-21 tool_use_id correlation closure with pairing_rate >= 0.40 over >=50 real pairs) remains unmet.",
+  "dispatched_id_formats_observed": ["toolu_smoke_01", "toolu_debug_01", "uuid-format", "toolu_018U6b7DDmYfpraYEEn55qUx", "toolu_01ApCHnmB8YA12WEooet5QBm", "toolu_01CdTtNzfCSGDNBeXg9dQzJJ", "toolu_01XWaUygg1iXwsgZ5oTLB7iK", "toolu_01QhW9d9FTT6v4oQm6wiT7bj", "toolu_016SEQuVPvm9z42cuqm9EeKB", "toolu_017s7emBZ43wqiF5TfknwA6T", "toolu_01Sj2cNbvLKr2prQdai3KAGk"],
+  "completed_id_format_observed": "hex (e.g. aaa80398aa10d20b8, abc216ad9e13bbc3d — different space from DISPATCHED)",
+  "decision_034_prereq": "1 (CF-21 tool_use_id correlation closure — pairing_rate >= 0.40 on real sample of >= 50 dispatch pairs)"
+}

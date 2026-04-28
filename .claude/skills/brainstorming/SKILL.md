@@ -1,7 +1,7 @@
 ---
 name: brainstorming
 description: Use at the START of a PLAN session or when the user says "should we...", "what if...", "thinking about...". Forces Socratic scope-definition before any plan or code. Blocks master-planner and sandwich-architect until scope is explicit.
-tools: [Read]
+allowed-tools: [Read]
 archetype: discipline
 model: opus
 ---

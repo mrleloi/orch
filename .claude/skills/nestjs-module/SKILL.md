@@ -1,7 +1,7 @@
 ---
 name: nestjs-module
 description: Use when creating, editing, or reviewing a NestJS feature module, service, controller, or DI wiring in `packages/core/`. Do NOT use for general TypeScript work that doesn't touch NestJS-specific constructs.
-tools: [Read, Bash, Grep, Edit]
+allowed-tools: [Read, Bash, Grep, Edit]
 archetype: reference
 ---
 

@@ -6,7 +6,7 @@ Editing `.claude/settings.json` hook entries; OR hooks-receiver module under
 `packages/core/`; OR `examples/stockforge-integration/hooks-snippet.json`;
 OR user mentions missing hook events, payload shape, or hook timing.
 
-## Expected Behavior
+## Expected behavior (PASS)
 
 Skill activates and async hooks (SessionStart/Stop/SubagentStop/PostToolUse)
 end with `&` (non-blocking). Sync hooks (PreToolUse/PreCompact) include
@@ -14,7 +14,7 @@ end with `&` (non-blocking). Sync hooks (PreToolUse/PreCompact) include
 `<schema>.parse(raw)` on body before insert (I-10) and consult `dedupKey`
 via `this.dedup.isDup(...)` BEFORE the repo insert (I-8 idempotency).
 
-## Failure Modes
+## Named failure modes
 
 - F1: missing `&` on async hook entries (SessionStart/Stop/SubagentStop/PostToolUse)
   — blocks Claude Code UX while curl runs synchronously

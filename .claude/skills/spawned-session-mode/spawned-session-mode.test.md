@@ -7,7 +7,7 @@ command, skill, or subagent that would otherwise call `AskUserQuestion`, show a 
 prompt, or block on stdin; OR a destructive op normally gated by I-6 confirmation when the
 session is running spawned (e.g. terminate-session, delete-queue-item, force-account-switch).
 
-## Expected Behavior
+## Expected behavior (PASS)
 
 When `ORCH_SPAWNED=true`: skill suppresses `AskUserQuestion`, resolves ambiguity via charter
 principles + decisions/NNN-*.md log, and ends with a structured YAML completion block parseable
@@ -15,7 +15,7 @@ by the orchestrator (fields: status, produced_files, decisions_made, next_action
 destructive ops remain gated; a pre-authorized flag in the task envelope REPLACES (does not
 REMOVE) the interactive confirmation.
 
-## Failure Modes
+## Named failure modes
 
 - F1: `AskUserQuestion` invoked while `ORCH_SPAWNED=true` (silent loop-break; daemon hangs
   indefinitely waiting for a response from nobody)

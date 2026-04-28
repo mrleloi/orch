@@ -19,8 +19,8 @@ import {
   mkdirSync,
   readFileSync,
   rmSync,
-  readdirSync,
   statSync,
+  appendFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { resolve, join } from 'node:path';
@@ -329,6 +329,191 @@ describe('component-telemetry.sh hook', () => {
         JSON.parse(result.lastJsonlLine!),
       );
       expect(event.component_type).toBe('hook');
+    } finally {
+      cleanupDir(dir);
+    }
+  });
+
+  // T-NA1: SubagentStop with sidecar entry → component_name resolved from sidecar
+  it('T-NA1 — SubagentStop sidecar lookup: hex agent_id resolved to task-implementer', () => {
+    const dir = makeIsolatedDir();
+    const SESSION_ID = 'test-session-na1';
+    try {
+      const memDir = join(dir, 'agent-workspace', 'memory');
+      const sidecarPath = join(memDir, `.dispatch-pending-${SESSION_ID}.jsonl`);
+      const HEX_AGENT_ID = 'a1bc30028d3af4315';
+
+      // Write a sidecar entry matching the hex agent_id (as PostToolUse-Agent would)
+      const sidecarEntry = JSON.stringify({
+        dispatch_id: HEX_AGENT_ID,
+        tool_use_id: 'toolu_abc123',
+        agent_type: 'task-implementer',
+        model: 'sonnet',
+      });
+      writeFileSync(sidecarPath, sidecarEntry + '\n', 'utf8');
+
+      const payload = JSON.stringify({
+        hook_event_name: 'SubagentStop',
+        session_id: SESSION_ID,
+        agent_id: HEX_AGENT_ID,
+        status: 'ok',
+      });
+      const result = runHook(payload, dir);
+
+      expect(result.exitCode).toBe(0);
+      expect(result.lastJsonlLine).not.toBeNull();
+
+      const event: ComponentEvent = ComponentEventSchema.parse(
+        JSON.parse(result.lastJsonlLine!),
+      );
+      expect(event.component_type).toBe('agent');
+      expect(event.component_name).toBe('task-implementer');
+      expect(event.trigger).toBe('agent_dispatch');
+    } finally {
+      cleanupDir(dir);
+    }
+  });
+
+  // T-NA2: fixture-driven — 10 SubagentStop events with matching sidecar entries → 0 unknown-agent
+  it('T-NA2 — SubagentStop sidecar batch: 10 events → all task-implementer, unknown_agent_fraction == 0', async () => {
+    const dir = makeIsolatedDir();
+    const SESSION_ID = 'test-session-na2';
+    try {
+      const memDir = join(dir, 'agent-workspace', 'memory');
+      const sidecarPath = join(memDir, `.dispatch-pending-${SESSION_ID}.jsonl`);
+      const jsonlPath = join(memDir, 'component-telemetry.jsonl');
+      const N = 10;
+
+      // Write 10 sidecar entries (one per synthetic agent dispatch)
+      // Simulates: 10 PreToolUse-Agent + 10 PostToolUse-Agent entries.
+      // Each entry has a unique hex agent_id keyed by dispatch_id.
+      const hexIds: string[] = [];
+      for (let i = 0; i < N; i++) {
+        // Generate a deterministic hex agent_id per index
+        const hexId = `a1bc300${String(i).padStart(2, '0')}deadbeef`;
+        hexIds.push(hexId);
+        // PreToolUse entry (toolu_* keyed)
+        const preEntry = JSON.stringify({
+          dispatch_id: `toolu_na2_${i}`,
+          tool_use_id: `toolu_na2_${i}`,
+          agent_type: 'task-implementer',
+          model: 'sonnet',
+        });
+        // PostToolUse hex-keyed entry (what SubagentStop will look up)
+        const postEntry = JSON.stringify({
+          dispatch_id: hexId,
+          tool_use_id: `toolu_na2_${i}`,
+          agent_type: 'task-implementer',
+          model: 'sonnet',
+        });
+        appendFileSync(sidecarPath, preEntry + '\n', 'utf8');
+        appendFileSync(sidecarPath, postEntry + '\n', 'utf8');
+      }
+
+      // Fire 10 SubagentStop events sequentially to avoid dedup (same ts + component_name
+      // would suppress identical concurrent events; sequential ensures distinct ts values).
+      // Each event has a unique agent_id so each produces a distinct component_name row.
+      // We poll each write individually using runHook's built-in poll mechanism.
+      const sab = new SharedArrayBuffer(4);
+      const sabView = new Int32Array(sab);
+
+      for (let i = 0; i < N; i++) {
+        const payload = JSON.stringify({
+          hook_event_name: 'SubagentStop',
+          session_id: SESSION_ID,
+          agent_id: hexIds[i],
+          status: 'ok',
+        });
+
+        // Snapshot line count before this invocation
+        let preCount = 0;
+        if (existsSync(jsonlPath)) {
+          const preContent = readFileSync(jsonlPath, 'utf8');
+          preCount = preContent.split('\n').filter((l) => l.trim().length > 0).length;
+        }
+
+        spawnSync('bash', [HOOK_SCRIPT], {
+          input: payload,
+          encoding: 'utf8',
+          env: { ...process.env, CLAUDE_PROJECT_DIR: dir },
+          timeout: 10_000,
+        });
+
+        // Poll for new line to land
+        const deadline = Date.now() + 8000;
+        while (Date.now() < deadline) {
+          if (existsSync(jsonlPath)) {
+            const content = readFileSync(jsonlPath, 'utf8');
+            const count = content.split('\n').filter((l) => l.trim().length > 0).length;
+            if (count > preCount) break;
+          }
+          Atomics.wait(sabView, 0, 0, 20);
+        }
+
+        // Brief yield between events to avoid same-millisecond dedup
+        Atomics.wait(sabView, 0, 0, 5);
+      }
+
+      // Read all emitted lines
+      expect(existsSync(jsonlPath)).toBe(true);
+      const allLines = readFileSync(jsonlPath, 'utf8')
+        .split('\n')
+        .filter((l) => l.trim().length > 0);
+
+      // All lines must parse
+      const events: ComponentEvent[] = allLines.map((l) =>
+        ComponentEventSchema.parse(JSON.parse(l)),
+      );
+
+      // Filter to only the agent rows (SubagentStop events)
+      const agentRows = events.filter((e) => e.component_type === 'agent');
+
+      // Assert: every agent row has component_name == 'task-implementer'
+      for (const row of agentRows) {
+        expect(row.component_name).toBe('task-implementer');
+      }
+
+      // Assert: we got at least N agent rows (one per SubagentStop)
+      expect(agentRows.length).toBeGreaterThanOrEqual(N);
+
+      // C.C.2: unknown_agent_fraction == 0 over the fixture set
+      const unknownCount = agentRows.filter(
+        (e) => e.component_name === 'unknown-agent',
+      ).length;
+      const unknownAgentFraction = unknownCount / agentRows.length;
+      expect(unknownAgentFraction).toBe(0);
+    } finally {
+      cleanupDir(dir);
+    }
+  });
+
+  // C.C.5: graceful degradation — no sidecar file → falls back to unknown-agent (no crash)
+  it('C.C.5 — SubagentStop without sidecar: graceful fallback to unknown-agent', () => {
+    const dir = makeIsolatedDir();
+    const SESSION_ID = 'test-session-cc5';
+    try {
+      const memDir = join(dir, 'agent-workspace', 'memory');
+      // Deliberately do NOT create the sidecar file
+      const sidecarPath = join(memDir, `.dispatch-pending-${SESSION_ID}.jsonl`);
+      expect(existsSync(sidecarPath)).toBe(false);
+
+      const payload = JSON.stringify({
+        hook_event_name: 'SubagentStop',
+        session_id: SESSION_ID,
+        agent_id: 'deadbeef1234abcd',
+        status: 'ok',
+      });
+      const result = runHook(payload, dir);
+
+      expect(result.exitCode).toBe(0);
+      expect(result.lastJsonlLine).not.toBeNull();
+
+      const event: ComponentEvent = ComponentEventSchema.parse(
+        JSON.parse(result.lastJsonlLine!),
+      );
+      expect(event.component_type).toBe('agent');
+      expect(event.component_name).toBe('unknown-agent');
+      expect(event.trigger).toBe('agent_dispatch');
     } finally {
       cleanupDir(dir);
     }

@@ -112,6 +112,17 @@ try {
 } catch { console.log(''); }
 " 2>/dev/null || true)"
 
+# agent_id — hex identifier present in SubagentStop payloads (Case γ sidecar lookup).
+AGENT_ID="$(printf '%s' "$PAYLOAD" | node -e "
+try {
+  let s = '';
+  process.stdin.on('data', c => s += c);
+  process.stdin.on('end', () => {
+    try { console.log(JSON.parse(s).agent_id || ''); } catch { console.log(''); }
+  });
+} catch { console.log(''); }
+" 2>/dev/null || true)"
+
 # If payload could not be parsed at all (all fields empty and tool_name also empty on PostToolUse
 # events), skip rather than writing a malformed row.
 if [ -z "$HOOK_EVENT_NAME" ] && [ -z "$SESSION_ID" ] && [ -z "$TOOL_NAME" ]; then
@@ -125,6 +136,9 @@ classify_component() {
   local hook_event="$1"
   local tool_name="$2"
   local subagent_type="$3"
+  # Parameters 4+5 used only for SubagentStop sidecar lookup (SC-39 Case γ).
+  local subagent_agent_id="${4:-}"
+  local subagent_session="${5:-}"
 
   COMP_TYPE=""
   COMP_NAME=""
@@ -160,8 +174,34 @@ classify_component() {
       ;;
     SubagentStop)
       COMP_TYPE="agent"
-      COMP_NAME="${subagent_type:-unknown-agent}"
       TRIGGER="agent_dispatch"
+      # SC-39 Case γ: look up named agent type from sidecar file using hex agent_id.
+      # Sidecar file: $MEMORY_DIR/.dispatch-pending-<session_id>.jsonl
+      # Entry shape (written by dispatch-jsonl-recorder.sh PostToolUse):
+      #   {"dispatch_id":"<hex>","tool_use_id":"toolu_*","agent_type":"<type>","model":"..."}
+      # "last match wins" — tail the file and grep for dispatch_id matching hex agent_id.
+      local sidecar_name sidecar_match sidecar_type
+      sidecar_name="${subagent_session:+$MEMORY_DIR/.dispatch-pending-${subagent_session}.jsonl}"
+      sidecar_type=""
+      if [ -n "$subagent_agent_id" ] && [ -n "$sidecar_name" ] && [ -f "$sidecar_name" ]; then
+        sidecar_match="$(grep "\"dispatch_id\":\"${subagent_agent_id}\"" "$sidecar_name" | tail -1 2>/dev/null || true)"
+        if [ -n "$sidecar_match" ]; then
+          sidecar_type="$(printf '%s' "$sidecar_match" | node -e "
+try {
+  let s = '';
+  process.stdin.on('data', c => s += c);
+  process.stdin.on('end', () => {
+    try { console.log(JSON.parse(s).agent_type || ''); } catch { console.log(''); }
+  });
+} catch { console.log(''); }
+" 2>/dev/null || true)"
+        fi
+      fi
+      if [ -n "$sidecar_type" ]; then
+        COMP_NAME="$sidecar_type"
+      else
+        COMP_NAME="${subagent_type:-unknown-agent}"
+      fi
       ;;
     SessionStart|Stop|PreToolUse|SessionEnd|UserPromptSubmit|PreCompact|Notification)
       COMP_TYPE="hook"
@@ -382,8 +422,8 @@ compose_event_jsonl() {
 # Determine timestamp at ms precision
 TS="$(date -u +%FT%T.%3NZ 2>/dev/null || date -u +%FT%TZ 2>/dev/null || true)"
 
-# Classify component
-classify_component "$HOOK_EVENT_NAME" "$TOOL_NAME" "$SUBAGENT_TYPE"
+# Classify component (pass agent_id + session_id for SubagentStop sidecar lookup)
+classify_component "$HOOK_EVENT_NAME" "$TOOL_NAME" "$SUBAGENT_TYPE" "${AGENT_ID:-}" "${SESSION_ID:-}"
 
 # Map outcome
 OUTCOME="ok"

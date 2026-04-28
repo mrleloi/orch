@@ -7,7 +7,7 @@
 - Handling migration files
 - User mentions WAL mode, SQLite concurrency, db locking, or busy_timeout
 
-## Expected Behavior
+## Expected behavior (PASS)
 
 Skill activates; status-transition repository methods use
 `updateMany({where:{...status:'X'}, data:{status:'Y'}})` (atomic compare-and-swap, no race).
@@ -15,7 +15,7 @@ Skill activates; status-transition repository methods use
 `synchronous = NORMAL`, `busy_timeout = 5000`, `foreign_keys = ON`.
 No network IO (`fetch`/`execa`) inside `$transaction` blocks.
 
-## Failure Modes
+## Named failure modes
 
 - F1: read-then-write pattern instead of `updateMany` with status guard -- race condition
   (Quick Reference shows the correct atomic pattern)

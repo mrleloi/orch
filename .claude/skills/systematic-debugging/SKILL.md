@@ -1,7 +1,7 @@
 ---
 name: systematic-debugging
 description: Use when a bug has resisted 2+ fix attempts, when root cause is unclear, or when a symptom is intermittent. Enforces 4-phase evidence-then-hypothesis flow. Not for trivial typos or already-diagnosed bugs.
-tools: [Read, Bash, Grep, Edit]
+allowed-tools: [Read, Bash, Grep, Edit]
 archetype: discipline
 model: opus
 ---

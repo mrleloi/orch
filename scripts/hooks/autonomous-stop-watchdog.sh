@@ -19,6 +19,26 @@ mkdir -p "$LOG_DIR"
 WATCHDOG_LOG="$LOG_DIR/.autonomous-stop-watchdog.log"
 TS="$(date -Iseconds 2>/dev/null || date)"
 
+# === CF-DOGFOOD-4: Stale .dogfood-stop marker visibility ===
+# If the .dogfood-stop marker exists at any invocation of this script (Stop or SessionStart),
+# emit a loud warning to the watchdog log AND to stderr so the operator sees it during
+# the hook pipeline output. We do NOT auto-clear the marker — it exists to halt dogfood
+# dispatches and must only be removed by a deliberate human action.
+#
+# SessionStart wiring: to also catch stale markers at session start, add this script
+# under the SessionStart hook in .claude/settings.json.
+DOGFOOD_STOP_MARKER_EARLY="$LOG_DIR/.dogfood-stop"
+if [[ -f "$DOGFOOD_STOP_MARKER_EARLY" ]]; then
+  MARKER_TS="$(head -1 "$DOGFOOD_STOP_MARKER_EARLY" 2>/dev/null | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9:+]+' | head -1 || echo "unknown")"
+  {
+    printf '[%s] [STALE-MARKER] .dogfood-stop present from %s; remove if intentional (rm %s)\n' \
+      "$TS" "$MARKER_TS" "$DOGFOOD_STOP_MARKER_EARLY"
+  } >> "$WATCHDOG_LOG"
+  printf '[autonomous-stop-watchdog] [STALE-MARKER] .dogfood-stop present from %s; remove if intentional (rm %s)\n' \
+    "$MARKER_TS" "$DOGFOOD_STOP_MARKER_EARLY" >&2
+fi
+# === end CF-DOGFOOD-4 ===
+
 # 1. Are we in autonomous mode?
 EXEC_FILE="$PROJECT_DIR/agent-workspace/memory/current-execution.md"
 if [[ ! -f "$EXEC_FILE" ]]; then

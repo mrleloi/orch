@@ -553,9 +553,32 @@ preflight_assertions:
 });
 
 describe('runSelfTask — TracingService reuse (T11)', () => {
+  /**
+   * T11 Brittleness Mitigation (Phase 9 v2.4 CF-T11):
+   *
+   * This test uses structural import-string assertions rather than a runtime
+   * mock-based check. This is intentional given the vitest ESM mocking limitation:
+   * vitest cannot intercept ES module imports from a different package scope
+   * (scripts/ importing packages/core) without vi.mock hoisting, which would
+   * require mocking all of TracingService's dependencies (a complex chain).
+   * The import-string approach is the pragmatic choice for this constraint.
+   *
+   * Why this approach is acceptable (not just brittle):
+   *   1. Absence checks: `trace.getTracer(` and `@opentelemetry/api` are structural
+   *      invariants. If a future refactor introduces them, the test correctly fails.
+   *   2. Presence checks: import-path assertions. If the module is renamed, the test
+   *      fails — which is the desired behavior, not silent regression.
+   *   3. A glob-scan of packages/core would be redundant: T11 guards a single harness
+   *      file (scripts/dogfood/run-self-task.ts), not a package-wide concern.
+   *
+   * This test is robust to non-import-string refactors (logic changes within
+   * TracingService.withSpan calls, span attribute changes, etc.) and only fails
+   * on the specific structural invariants it was designed to guard.
+   */
   it('T11: harness imports TracingService from @orch/core, not a new tracer', async () => {
-    // Verify the import path in the source file resolves to the existing TracingService.
-    // We do this by reading the source and asserting the import statement is present.
+    // Scan the harness source for structural invariants.
+    // Using source-file scanning because vitest ESM mocking cannot intercept
+    // cross-package ES module imports without a full mock chain (see note above).
     const harnessSource = fs.readFileSync(
       path.resolve(REPO_ROOT, 'scripts/dogfood/run-self-task.ts'),
       'utf8',

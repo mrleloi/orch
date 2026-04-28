@@ -1,7 +1,7 @@
 ---
 name: grammy-bot
 description: Use when creating, editing, or reviewing any code under `packages/telegram/`, or when the user mentions a Telegram bot handler, command, inline keyboard, middleware, or notification. Do NOT use for non-Grammy Telegram API work.
-tools: [Read, Bash, Grep, Edit]
+allowed-tools: [Read, Bash, Grep, Edit]
 archetype: reference
 ---
 

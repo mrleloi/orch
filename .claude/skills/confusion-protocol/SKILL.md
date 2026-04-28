@@ -1,7 +1,7 @@
 ---
 name: confusion-protocol
 description: Use the moment you notice confusion, unclear spec intent, conflicting invariants, or "I'm not sure which way to go." Prevents guessing-as-progress. Forces STOP, document, and either ask or pick-with-justification.
-tools: [Read, Write]
+allowed-tools: [Read, Write]
 archetype: discipline
 model: opus
 ---

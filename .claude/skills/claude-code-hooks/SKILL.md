@@ -1,7 +1,7 @@
 ---
 name: claude-code-hooks
 description: Use when editing `.claude/settings.json` hook entries, the hooks-receiver module under `packages/core/`, or the `examples/stockforge-integration/hooks-snippet.json`. Also use when the user mentions missing hook events, hook payload shape, or hook timing.
-tools: [Read, Bash, Grep, Edit]
+allowed-tools: [Read, Bash, Grep, Edit]
 archetype: reference
 ---
 

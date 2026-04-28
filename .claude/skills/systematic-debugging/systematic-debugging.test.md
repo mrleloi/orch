@@ -8,7 +8,7 @@
 - Integration bug: subprocess / hook / trace-context propagation
 - Any moment the assistant catches itself guessing at root cause
 
-## Expected Behavior
+## Expected behavior (PASS)
 
 Skill activates; 4-phase flow executes in order: Phase 1 instruments every
 component boundary crossed by the symptom (logging added, scenario run ONCE,
@@ -17,7 +17,7 @@ Phase 3 tests ONE hypothesis at a time (max 3 attempts, each reverted on FAIL).
 Phase 4 writes regression test then applies fix. Phase 4.5 fires after 3 FAILED
 hypotheses: write escalation.md and HALT. NO bundled changes at any point.
 
-## Failure Modes
+## Named failure modes
 
 - Mode F1: hypothesis bundled -- "let me change X and Y together" applied in a single diff (Phase 3 violation; single-variable isolation is mandatory)
 - Mode F2: 4th hypothesis attempted instead of stopping at 3 and writing escalation.md (Phase 4.5 violation; historical >95% failure rate beyond 3 hypotheses)

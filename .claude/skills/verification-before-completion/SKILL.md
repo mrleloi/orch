@@ -1,7 +1,7 @@
 ---
 name: verification-before-completion
 description: Use after any implementation task before declaring it done. Enforces evidence-based completion — "done" requires artifacts, not assertions. Applies to every IMPL subtask, not just session end.
-tools: [Bash, Read, Grep]
+allowed-tools: [Bash, Read, Grep]
 archetype: discipline
 model: sonnet
 ---

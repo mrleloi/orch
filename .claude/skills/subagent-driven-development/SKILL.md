@@ -1,7 +1,7 @@
 ---
 name: subagent-driven-development
 description: Use when executing a session plan that has N discrete tasks. Drives subagent-per-task execution with two-stage review. Mandatory for MULTI_TASK_IMPL sessions with 3+ tasks. Cannot be rationalized away by "the session is small enough to do in one subagent."
-tools: [Read, Task, Bash]
+allowed-tools: [Read, Task, Bash]
 archetype: discipline
 model: opus
 ---

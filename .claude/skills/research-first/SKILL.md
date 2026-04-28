@@ -1,7 +1,7 @@
 ---
 name: research-first
 description: Use when touching an external API, library, or runtime pattern that is unfamiliar to this codebase — especially subprocess patterns, hook contracts, OTEL propagation, SQLite WAL concerns, Grammy middleware. Blocks Write/Edit until research artifact exists.
-tools: [Read, Bash, WebFetch, Glob, Grep]
+allowed-tools: [Read, Bash, WebFetch, Glob, Grep]
 archetype: discipline
 model: sonnet
 ---

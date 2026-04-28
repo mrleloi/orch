@@ -5,7 +5,7 @@
 About to write "task done", "implemented", or "fixed" anywhere (commit message,
 session log, self-report, orchestrator response) - once per task, not per session.
 
-## Expected Behavior
+## Expected behavior (PASS)
 
 Skill activates and emits a `## Completion Verification -- Task <id>` checklist
 with `[x]` for typecheck, lint, scoped tests, and invariant grep
@@ -14,7 +14,7 @@ literal patterns `passed` and `failed` is pasted inline. `status: DONE` is only
 emitted when every checklist item is checked; otherwise `DONE_WITH_CONCERNS` or
 `BLOCKED`.
 
-## Failure Modes
+## Named failure modes
 
 - Mode F1: "Looks good to me" without running gates (Red Flag - gate evidence absent)
 - Mode F2: assertion claim ("tests pass") emitted without pasted output (Rationalization

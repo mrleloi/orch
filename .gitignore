@@ -72,6 +72,16 @@ agent-workspace/memory/.session-hooks.log
 agent-workspace/memory/dispatch.jsonl
 agent-workspace/memory/.dispatch-pending-*.jsonl
 
+# Ephemeral runtime markers (machine-local hook/watchdog state, per-session UUIDs)
+agent-workspace/memory/.continue-fired-*
+agent-workspace/memory/.last-event-ts-*
+agent-workspace/memory/.mode-c-recovery-fired-*
+agent-workspace/memory/.session-ready
+agent-workspace/memory/.transcript-tokens
+agent-workspace/memory/.transcript-tokens-prev
+agent-workspace/memory/.diag-pretooluse/
+agent-workspace/memory/.diag-subagentstop/
+
 # macOS
 .AppleDouble
 .LSOverride
@@ -83,6 +93,9 @@ docker/volumes/
 # Temporary
 tmp/
 .tmp/
+
+# Backup files (defense-in-depth: prevent .bak scope creep in git add -A)
+*.bak
 
 # Multi-user demo scratch workspace
 examples/multi-user/.scratch/

@@ -115,4 +115,34 @@ describe('citation-linter.ts --rollup', () => {
     const { exitCode, stdout, stderr } = runLinter(['--rollup', phase6Path]);
     expect(exitCode, `Phase 6 rollup should exit 0 (all rows PASS/EXEMPT/EXEMPT_SENTINEL). stdout: ${stdout} stderr: ${stderr}`).toBe(0);
   });
+
+  // R7 — CF-25 dedup: WebFetch and TaskList must be EXEMPT (not FAIL) — Phase 10.2
+  it('R7 — CF-25 dedup: hook::WebFetch → exit 0 (EXEMPT, not FAIL)', () => {
+    const dir = makeTmpDir();
+    try {
+      const rollupPath = join(dir, 'rollup.md');
+      writeFileSync(rollupPath, makeRollupMd([{ type: 'hook', name: 'WebFetch' }]), 'utf8');
+      const { exitCode, stdout, stderr } = runLinter(['--rollup', rollupPath]);
+      expect(exitCode, 'hook::WebFetch should be EXEMPT (built-in), not FAIL').toBe(0);
+      expect(stdout + stderr).not.toMatch(/FAIL.*WebFetch/);
+    } finally { cleanupDir(dir); }
+  });
+
+  it('R8 — CF-25 dedup: hook::TaskList → exit 0 (EXEMPT, not FAIL)', () => {
+    const dir = makeTmpDir();
+    try {
+      const rollupPath = join(dir, 'rollup.md');
+      writeFileSync(rollupPath, makeRollupMd([{ type: 'hook', name: 'TaskList' }]), 'utf8');
+      const { exitCode, stdout, stderr } = runLinter(['--rollup', rollupPath]);
+      expect(exitCode, 'hook::TaskList should be EXEMPT (built-in), not FAIL').toBe(0);
+      expect(stdout + stderr).not.toMatch(/FAIL.*TaskList/);
+    } finally { cleanupDir(dir); }
+  });
+
+  // R9 — Phase 9 rollup smoke (CF-25 regression guard): contains WebFetch + TaskList
+  it('R9 — Phase 9 rollup smoke (CF-25 regression guard): --phase 9 → exit 0', () => {
+    const phase9Path = resolve(repoRoot, 'agent-workspace/memory/component-rollup-phase-9.md');
+    const { exitCode, stdout, stderr } = runLinter(['--rollup', phase9Path]);
+    expect(exitCode, `Phase 9 rollup should exit 0 (WebFetch + TaskList now EXEMPT). stdout: ${stdout} stderr: ${stderr}`).toBe(0);
+  });
 });

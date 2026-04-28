@@ -7,14 +7,14 @@
 - New feature request without a matching spec in specs/tier2-feature/
 - User states a goal without acceptance criteria
 
-## Expected Behavior
+## Expected behavior (PASS)
 
 Skill activates; Read is the only tool allowed during activation. Assistant asks 3-5
 Socratic scope-defining questions (not interrogation). No Write/Edit tool fires. After
 user responds, skill produces a locked scope option and transitions to master-planner
 OR writes a decisions/NNN-defer-<slug>.md if deferred.
 
-## Failure Modes
+## Named failure modes
 
 - Mode F1: skill skipped — master-planner invoked directly on an exploratory "thinking about X" prompt without scope definition first
 - Mode F2: >5 questions asked in a single activation turn (interrogation pattern, not Socratic)

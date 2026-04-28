@@ -1,0 +1,16 @@
+{
+  "phase": "10",
+  "measured_at": "2026-04-28T00:00:00Z",
+  "source_file": "agent-workspace/memory/component-telemetry.jsonl",
+  "total_events": 8031,
+  "total_agent_rows": 200,
+  "unknown_agent_rows": 200,
+  "fraction": 1.0,
+  "target_threshold": 0.30,
+  "gate_verdict": "FAIL",
+  "phase_9_baseline_fraction": 1.0,
+  "delta_from_phase_9": 0.0,
+  "notes": "Post-10.5.2 named-agent sidecar recovery (C-seam fix) was implemented for the synthetic T-NA2 test fixture but does not surface in the production component-telemetry.jsonl stream. All 200 agent-type events remain component_name=unknown-agent. The unknown_agent_fraction is 1.000, unchanged from Phase 9 baseline (1.000). This is the CF-21 structural gap: spawned agents do not self-report canonical component_name through the production telemetry seam. Gate FAIL: 1.000 >> 0.30 threshold. Decision 034 prerequisite 2 (Named-agent self-reporting) remains unmet.",
+  "non_unknown_agents_seen": [],
+  "decision_034_prereq": "2 (Named-agent self-reporting — unknown_agent_fraction < 0.30 over stable phase cycle)"
+}
