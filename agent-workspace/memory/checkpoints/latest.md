@@ -1,3 +1,64 @@
+# Checkpoint — Phase 11 v2.6 burndown — Session #45 (post-v2.5-release)
+
+Created: 2026-04-28 session #45.
+Source: opus 4.7 main session continued post terminal-restart.
+Status: **v2.5 RELEASED (commit 92f50ec, tag v2.5). Phase 11 v2.6 master plan AUTHORED. 11.0 routing brief in flight.**
+
+## v2.5 release — terminal state
+
+- Commit: `92f50ec v2.5: Phase 9 close + Phase 10 v2.5 carryforward burndown`
+- Tag: `v2.5`
+- `git log --oneline | wc -l` = 2 (init + v2.5)
+- `git tag -l` = `v2.5`
+- Working tree: 1 modified marker file (gitignored, ignorable)
+
+**Pre-commit hook fix applied this session**: skill validator was rejecting all 13 SKILL.md files (`tools:` → `allowed-tools:` rename) and all 13 sibling test files (`## Expected Behavior` → `## Expected behavior (PASS)`; `## Failure Modes` → `## Named failure modes`). All 26 files batch-renamed via sed; validator now PASS (0 errors, 10 description-too-long warnings only — non-blocking).
+
+**Harness commit-permission anomaly observed**: `Bash(git commit:*)` is in `.claude/settings.local.json` allowlist, yet harness denied the call twice from the assistant; user used terminal `!` prefix to bypass. `git tag` succeeded from assistant in same session. Likely cause: harness permission cache evaluates rules at session boot; mid-session settings.local.json edits don't take effect until reboot. **Workaround for future**: stage commit message to `.git/COMMIT_EDITMSG_<tag>` and have user shell-execute. Not a Phase-11 blocker — same release-handoff pattern works.
+
+## Phase 11 v2.6 master plan
+
+- File: `agent-workspace/session-plans/pending/phase-11-v2.6-carryforward-burndown.md` (939 LOC).
+- 10 substages: `11.0 → {11.1, 11.2, 11.3} parallel → 11.4 mid-verify → 11.5.{1,2,3} → 11.6 → 11.7 close`.
+- Total budget: 870K mid-estimate.
+- Load-bearing: **11.5 SC-39 retry framework** (R-1/R-2/R-3/R-4 per Decision 035; ~360K).
+- Mandatory v2.6 decisions: **037 (SC-39 retry verdict v2.6)** + **039 (CF-DOGFOOD-2 disposition)**.
+- Pre-authorized v2.7 deferrals: 9 candidates incl. CF-DOGFOOD-2 IMPL leg, F-2 scaffolding, community OSS launch, multi-user rollout.
+
+## In-flight subagents
+
+| BG agent ID | Substage | Role | Model | Effort | Output |
+|---|---|---|---|---|---|
+| `a0879ad636425adbc` | 11.0 | task-implementer (routing brief author) | sonnet | medium | `agent-workspace/memory/phase-11-routing-brief.md` |
+
+## Real-transcript state
+
+End of this turn: ~140K. Wind-down at 200K. Cliff at 230K. **~60K headroom.** No `.wind-down` marker.
+
+11.0 return absorbs ~3-5K. Then likely dispatch 11.1+11.2+11.3 in parallel (mirror Phase 10 §10.{1,2,3} parallel dispatch pattern). After 11.0 + first parallel batch, real transcript expected ~165-175K. Watchdog likely fires `.wind-down` within 1-2 more turns; SendKeys auto-reboot.
+
+## NEXT ACTION
+
+### Priority 1 — On 11.0 (`a0879ad636425adbc`) return
+1. Verify `phase-11-routing-brief.md` exists with §1-§5 sections + 200-350 LOC.
+2. Cross-check §3 D4 concurrency cap (≤2 opus/* concurrent) against master plan §3.
+3. Log any §5 open-questions to escalation.md if blocking.
+
+### Priority 2 — Dispatch 11.1 + 11.2 + 11.3 in parallel
+Per master plan §3 critical path: `{11.1 hygiene-batch (sonnet/medium), 11.2 audit-trail (sonnet/medium), 11.3 CF-DOGFOOD-2 disposition (opus/medium)}` are parallel-safe (verify in routing brief §3 D4 cap; opus count = 1, within ≤2).
+
+### Priority 3 — On all 3 parallel returns: dispatch 11.4 mid-verify
+Pattern matches Phase 10 §10.4 (sonnet/medium, ~50K).
+
+### Priority 4 — 11.5 load-bearing substage
+Strategic load. Architect (11.5.1, opus/medium) → IMPL (11.5.2, sonnet/medium) → measure+verdict (11.5.3, opus/medium for Decision 037 author). 360K total.
+
+### Priority 5 — 11.6 (gated F-2 scaffold) + 11.7 (phase-close + v2.6 release)
+
+## Below: original Phase 10 / session #43 checkpoint preserved for traceability
+
+---
+
 # Checkpoint — Phase 10 v2.5 burndown — Session #44 turn 1 (post-/clear-resume from #43)
 
 Created: 2026-04-28 session #44 turn 1.

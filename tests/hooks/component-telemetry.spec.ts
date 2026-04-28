@@ -450,7 +450,10 @@ describe('component-telemetry.sh hook', () => {
           Atomics.wait(sabView, 0, 0, 20);
         }
 
-        // Brief yield between events to avoid same-millisecond dedup
+        // Brief yield between events to avoid same-millisecond dedup.
+        // 5ms is sufficient: the background subshell (7× node -e invocations) takes
+        // ~80-200ms to complete, so by the time the next event fires the previous write
+        // has already landed — this yield just separates ts values, not I/O timing.
         Atomics.wait(sabView, 0, 0, 5);
       }
 

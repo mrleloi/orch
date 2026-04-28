@@ -25,6 +25,10 @@ process.stdin.on('end',()=>{
     console.log('STATUS='+q(p.status));
     console.log('SUBAGENT_TYPE='+q((p.tool_input&&p.tool_input.subagent_type)||''));
     // PostToolUse: extract agentId from result content text (Case γ)
+    // Format-stability assumption: Claude Code Agent tool result text contains "agentId: <hex>"
+    // as a stable field. If Anthropic changes this format, RESULT_AGENT_ID will be empty,
+    // SubagentStop correlation will fall back to graceful-degradation (unknown-agent), and
+    // a stderr warning will be emitted so the format change is detectable in hook logs.
     const resultText=(p.tool_response&&p.tool_response.content&&p.tool_response.content[0]&&p.tool_response.content[0].text)||'';
     const m=resultText.match(/agentId:\\s*([a-f0-9]{10,20})/i);
     console.log('RESULT_AGENT_ID='+q(m?m[1]:''));
@@ -52,6 +56,8 @@ if [ "$HOOK_EVENT" = "PreToolUse" ]; then
   ATYPE="${SUBAGENT_TYPE:-unknown-agent}"
   [ -z "$ATYPE" ] && ATYPE="unknown-agent"
   # Write sidecar entry keyed by tool_use_id (toolu_*) — no hex agent_id yet (Case γ)
+  # Field name: agent_type per Decision 023 schema. IMP-1 deferred a rename to subagent_type
+  # for schema parity with tool_input.subagent_type; kept as agent_type for dispatch.jsonl stability.
   printf '%s\n' "{\"dispatch_id\":\"${DID}\",\"tool_use_id\":\"${DID}\",\"agent_type\":\"${ATYPE}\",\"model\":\"${MODEL}\"}" >> "$SIDECAR"
   # DISPATCHED row: 10 fields (Decision 023 + tool_use_id extension)
   printf '%s\n' "{\"event\":\"DISPATCHED\",\"dispatch_id\":\"${DID}\",\"agent_type\":\"${ATYPE}\",\"model\":\"${MODEL}\",\"parent_session_id\":\"${PARENT_SID}\",\"bg\":true,\"ts_ms\":${TS_MS},\"outcome\":null,\"tokens_used\":null,\"tool_use_id\":\"${DID}\"}" >> "$DISPATCH_JSONL"
@@ -59,6 +65,10 @@ elif [ "$HOOK_EVENT" = "PostToolUse" ]; then
   # PostToolUse-Agent: extract hex agentId from result text and write second sidecar index entry.
   # This enables SubagentStop to look up by hex agent_id → retrieve tool_use_id.
   HEX_ID="${RESULT_AGENT_ID:-}"
+  # Warn if agentId could not be extracted — indicates format change in Agent tool result text.
+  if [ -z "$HEX_ID" ]; then
+    printf '[WARN] dispatch-jsonl-recorder: PostToolUse-Agent: RESULT_AGENT_ID empty — agentId pattern not found in result text. SubagentStop correlation will degrade to unknown-agent.\n' >&2
+  fi
   ORIG_TID="${TOOL_USE_ID:-}"
   if [ -n "$HEX_ID" ] && [ -n "$ORIG_TID" ] && [ -f "$SIDECAR" ]; then
     # Find the sidecar entry for this tool_use_id to retrieve agent_type + model
@@ -71,6 +81,7 @@ process.stdin.on('end',()=>{ try{const p=JSON.parse(s);
   console.log('MODEL='+JSON.stringify(p.model||'unknown'));
 }catch{console.log('ATYPE=\"unknown-agent\"\nMODEL=\"unknown\"');} });" 2>/dev/null || echo 'ATYPE="unknown-agent"')"
       # Write hex-keyed sidecar entry: key = hex agent_id, value includes tool_use_id for back-ref
+      # agent_type field name: Decision 023 canonical. IMP-1 deferred rename to subagent_type.
       printf '%s\n' "{\"dispatch_id\":\"${HEX_ID}\",\"tool_use_id\":\"${ORIG_TID}\",\"agent_type\":\"${ATYPE}\",\"model\":\"${MODEL}\"}" >> "$SIDECAR"
     fi
   fi
@@ -99,13 +110,13 @@ process.stdin.on('end',()=>{ try{const p=JSON.parse(s);
   # B.B.3: tool_use_id must be null (JSON null) on sidecar-miss; dispatch_id stays as hex agent_id.
   if [ -n "$TOOL_USE_ID_FOUND" ]; then
     DID="$TOOL_USE_ID_FOUND"
-    TUI_JSON="\"$TOOL_USE_ID_FOUND\""
+    TOOL_USE_ID_JSON="\"$TOOL_USE_ID_FOUND\""
   else
     DID="${LID:-unknown}"
-    TUI_JSON="null"
+    TOOL_USE_ID_JSON="null"
   fi
   # COMPLETED row: 10 fields (Decision 023 + tool_use_id extension)
-  printf '%s\n' "{\"event\":\"COMPLETED\",\"dispatch_id\":\"${DID}\",\"agent_type\":\"${ATYPE}\",\"model\":\"${MODEL}\",\"parent_session_id\":\"${PARENT_SID}\",\"bg\":true,\"ts_ms\":${TS_MS},\"outcome\":${OUTCOME},\"tokens_used\":null,\"tool_use_id\":${TUI_JSON}}" >> "$DISPATCH_JSONL"
+  printf '%s\n' "{\"event\":\"COMPLETED\",\"dispatch_id\":\"${DID}\",\"agent_type\":\"${ATYPE}\",\"model\":\"${MODEL}\",\"parent_session_id\":\"${PARENT_SID}\",\"bg\":true,\"ts_ms\":${TS_MS},\"outcome\":${OUTCOME},\"tokens_used\":null,\"tool_use_id\":${TOOL_USE_ID_JSON}}" >> "$DISPATCH_JSONL"
 fi
 ) </dev/null >/dev/null 2>&1 &
 disown 2>/dev/null || true

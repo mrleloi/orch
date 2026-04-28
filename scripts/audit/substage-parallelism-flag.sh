@@ -101,8 +101,17 @@ for SUB_A in "${!SUBSTAGE_PARALLEL[@]}"; do
   FILES_A="${SUBSTAGE_OUTPUT[$SUB_A]:-}"
 
   for SUB_B in $PEERS; do
-    # Avoid double-counting (A∥B and B∥A): only check when A < B lexicographically
-    [[ "$SUB_A" < "$SUB_B" ]] || continue
+    # Avoid double-counting (A∥B and B∥A): only process each pair once.
+    # Compare by splitting on '.' and comparing major then minor as integers.
+    # String '<' would mis-order: "9.10" < "9.2" = true (WRONG); integer split handles it correctly.
+    IFS='.' read -r A_MAJ A_MIN <<< "$SUB_A"
+    IFS='.' read -r B_MAJ B_MIN <<< "$SUB_B"
+    A_MAJ="${A_MAJ:-0}"; A_MIN="${A_MIN:-0}"
+    B_MAJ="${B_MAJ:-0}"; B_MIN="${B_MIN:-0}"
+    # Only process pair when A < B (numerically): skip if A >= B
+    if [[ "$A_MAJ" -gt "$B_MAJ" ]] || { [[ "$A_MAJ" -eq "$B_MAJ" ]] && [[ "$A_MIN" -ge "$B_MIN" ]]; }; then
+      continue
+    fi
 
     FILES_B="${SUBSTAGE_OUTPUT[$SUB_B]:-}"
 

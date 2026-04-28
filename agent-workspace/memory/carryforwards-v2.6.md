@@ -113,3 +113,34 @@ Verdict: PASS_WITH_CONCERNS (0 critical, 1 important, 9 minor → all already ro
 3. Orchestrator-side: when a reviewer returns inline-only, the dispatcher (this main session) writes the report itself before moving on. Already practiced ad-hoc; could be promoted to a discipline skill.
 
 The orchestrator already practices path #3 reactively (this session created `task-10.5.2.B-20260428-code-quality.md` and `task-10.5-20260428-sandwich-verifier.md` from inline returns). v2.6 should formalize one of the three paths above.
+
+## Source: 11.3 disposition close (binding decision, 2026-04-28)
+
+### CF-DOGFOOD-2 — BOUND (DEFER-V2.7)
+
+**Status**: bound — no longer pending v2.6 disposition.
+
+**Disposition**: `agent-workspace/memory/decisions/039-cf-dogfood-2-disposition-v2.6.md`
+authors verdict **DEFER-V2.7** with re-attempt prerequisites
+R-039.1..R-039.5. Carried forward to `carryforwards-v2.7.md` with full
+trigger conditions.
+
+**Why DEFER-V2.7 not FIX_INLINE in v2.6**: zero of the four Phase 10
+§4.2 trigger conditions were met at Phase 11 entry. Decision 035
+verdict (DEFER-V2.6) is the dominant factor — SC-39 self-evolution
+loop remains gated, so real dogfood telemetry is not load-bearing
+for v2.6. See Decision 039 §3 for full rationale.
+
+**Why DEFER-V2.7 not WONT_FIX**: WONT_FIX would foreclose a v2.7+
+option the architectural assessment explicitly preserves; the
+structural stub remains in code as a known seam. See Decision 039
+§3.6.
+
+**No code changes in v2.6**: `scripts/dogfood/run-self-task.ts:387`
+stub remains; `tests/dogfood/run-self-task.spec.ts` unchanged;
+`agent-workspace/queue/self-tasks/_smoke-fixture.yaml` is the only
+envelope (C2 + C3 remain unauthored).
+
+**Charter-coherence**: per Decision 027 §C-8 (scaffold-now-execute-later);
+per Decision 033 Deliberation E (structural-defer pattern). All
+invariants preserved (see Decision 039 §4.4 cross-check table).

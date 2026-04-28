@@ -400,7 +400,7 @@ describe('dispatch-jsonl-recorder.sh — SC-39 Case γ sidecar correlation', () 
         session_id: 'sess-H8',
         tool_name: 'Agent',
         tool_use_id: 'toolu_TEST_001',
-        tool_input: { subagent_type: 'test-impl' },
+        tool_input: { subagent_type: 'task-implementer' },
       });
       const { exitCode, jsonlLines } = runHook(payload, dir);
 

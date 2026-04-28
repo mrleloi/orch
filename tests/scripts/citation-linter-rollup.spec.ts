@@ -15,7 +15,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, writeFileSync, rmSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
@@ -142,6 +142,12 @@ describe('citation-linter.ts --rollup', () => {
   // R9 — Phase 9 rollup smoke (CF-25 regression guard): contains WebFetch + TaskList
   it('R9 — Phase 9 rollup smoke (CF-25 regression guard): --phase 9 → exit 0', () => {
     const phase9Path = resolve(repoRoot, 'agent-workspace/memory/component-rollup-phase-9.md');
+    // Precondition: the fixture file must actually contain WebFetch and TaskList rows
+    // so this test is a true regression guard for CF-25 (not just a "file exists" check).
+    const rollupContent = readFileSync(phase9Path, 'utf8');
+    expect(rollupContent, 'phase-9 rollup must contain WebFetch row for CF-25 guard').toMatch(/WebFetch/);
+    expect(rollupContent, 'phase-9 rollup must contain TaskList row for CF-25 guard').toMatch(/TaskList/);
+
     const { exitCode, stdout, stderr } = runLinter(['--rollup', phase9Path]);
     expect(exitCode, `Phase 9 rollup should exit 0 (WebFetch + TaskList now EXEMPT). stdout: ${stdout} stderr: ${stderr}`).toBe(0);
   });

@@ -109,7 +109,6 @@ declare -A CHECK_PLANNED=(
 )
 
 GATE_FAIL_COUNT=0
-FAIL_COUNT=0   # explicit accumulator — each failed sub-check increments this
 SESSION_COUNT=$(ls -1 "${PROJECT_DIR}/agent-workspace/memory/sessions/"*.md 2>/dev/null | wc -l || echo 0)
 START_EPOCH=$(date +%s 2>/dev/null || echo 0)
 
@@ -279,8 +278,8 @@ run_check() {
           evidence="${evidence} I-6_commit_count:${COMMIT_COUNT}"
         fi
       fi
-
-      [[ "$exit_code" -eq 0 ]] && printf '[PASS] A.4 invariant grep sweep — no violations\n'
+      # Note: [PASS] A.4 is printed inside each branch above (drift-check and fallback grep);
+      # no duplicate print here to avoid double-printing when exit_code==0.
       ;;
 
     A.5)
@@ -400,7 +399,6 @@ run_check() {
     else
       verdict="FAIL"
       GATE_FAIL_COUNT=$((GATE_FAIL_COUNT + 1))
-      FAIL_COUNT=$((FAIL_COUNT + 1))
     fi
   fi
 
@@ -496,9 +494,9 @@ printf '\nAttestation written: %s\n' "$ATTESTATION_FILE"
 # Emit root span summary
 emit_span "verify.run_summary" "$FINAL_VERDICT" "CLASS_A" "$TOTAL_MS" "$GATE_FAIL_COUNT"
 
-# Explicit exit code propagation — FAIL_COUNT accumulates every failed sub-check;
+# Explicit exit code propagation — GATE_FAIL_COUNT accumulates every failed sub-check;
 # this ensures exit 1 even if the last sub-check happened to pass.
-if [[ "$FAIL_COUNT" -gt 0 ]]; then
+if [[ "$GATE_FAIL_COUNT" -gt 0 ]]; then
   exit 1
 fi
 exit 0
