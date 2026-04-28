@@ -1,0 +1,18 @@
+1. đã hoàn thành xong 2 task đầu ở phase 12 là 12.1 và 12.2, trước khi có thể dùng "orch" để self-code chính nó. nhưng tôi nhận ra một điều:
+1.1. mục đích ban đầu của việc tách các "self-reboot" ra, dùng "/clear" và "/new" là để đảm bảo context window phù hợp cho mỗi phiên agent hoạt động.
+nhưng hiện tại, cost ban đầu của mỗi lần reboot này quá lớn để agent tiếp tục được công việc trước đó.
+lúc đầu, số memory, notes, learning knowledge, tracking là ít, trông có vẻ ổn, nhưng sau rất nhiều phase và session hoạt động, hiện tại chi phí cho mỗi lần reboot đã rất đắt đỏ.
+=> điều này vừa khiến budget tăng lên, vừa làm quality giảm xuống vì agent phải load rất nhiều thông tin nhiễu, có thể gây ra sai sót khi recovering cho new session, thay vì chỉ focus duy nhất vào công việc ngay trước đó.
+1.2. điều này đặt ra nhu cầu phải quản lý được chính agent config/settings, phải inject chính xác nhất có thể mọi nhu cầu on-demand thôi.
+- ví dụ agent master plan, nó đâu cần inject những thông tin, skill, config của agent review hay agent tester đâu?
+tương tự như vậy cho mọi hoạt động.
+việc chia nhỏ ra thành các agent, subagent, plan, session, etc... đều có mục đích chung là inject đúng lượng context input vừa đủ cho agent, cùng với cấu hình tối thiểu, để hoàn thành được công việc với chất lượng đạt yêu cầu.
+=> hệ thống của orch cần phải giúp đỡ các agent trong quá trình hoàn thành công việc đó, vừa inject context đầu vào, rồi mỗi khi agent cần thông tin gì, công cụ gì, thì hệ thống đã được thiết kế để agent sử dụng được chính xác, nhanh chóng, và tối ưu budget nhất có thể.
+=> ngay sau khi orch có thể tự chạy được để self-code được chính nó (task 12.3) thì việc đầu tiên nó cần phải làm sau đó chính là yêu cầu này.
+=> đánh giá lại dự án, mục tiêu, các plan, chỉnh sửa nâng cấp lại nếu cần
+=> sau đó bắt đầu thực hiện theo chế độ autonomous, tự động hóa hoàn toàn.
+
+2. một số lưu ý:
+- chia subagent đúng model claude, chia sonnet và opus, với effort mode phù hợp để hoàn thành những việc phù hợp.
+- folder "C:\htdocs\orch-starter" hoàn toàn cho phép bạn tùy chỉnh mọi thứ
+- không cần hỏi thêm ý kiến tôi, tự động hoàn thành theo đề xuất hợp lý của bạn, chỉ dừng lại công việc sau khi toàn bộ công việc của dự án đã hoàn thành

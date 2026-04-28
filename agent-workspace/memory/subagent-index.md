@@ -1,4 +1,4 @@
-# Subagent Index — generated 2026-04-28T11:48:48+07:00
+# Subagent Index — generated 2026-04-28T14:46:46+07:00
 
 | agentId | type | model | start_ts | return_ts | duration_s | session_id | task_id | verdict_class | source |
 |---|---|---|---|---|---|---|---|---|---|
@@ -13,8 +13,10 @@
 | a043952a49faefbb9 | unknown | unknown | n/a | 2026-04-28T10:39:59+07:00 | n/a | a83e3b53-60d2-4db7-b525-16191b0351c1 | unknown | unknown | hooks_log |
 | a04a3bb1781a6036f | unknown | unknown | n/a | 2026-04-27T20:06:46+07:00 | n/a | 48b93c5b-2648-4bba-8c97-72e17cd3f906 | unknown | unknown | hooks_log |
 | a04e6947374078340 | unknown | unknown | n/a | 2026-04-26T17:08:08+07:00 | n/a | d3c896df-a38f-452c-a744-170ccade9179 | unknown | unknown | hooks_log |
+| a050f23aa3ca8babf | unknown | unknown | n/a | 2026-04-28T13:29:39+07:00 | n/a | 685518f2-bc90-47ea-af26-89bc85c5b229 | unknown | unknown | hooks_log |
 | a05668ea3deefa4cc | unknown | unknown | n/a | 2026-04-28T03:29:40+07:00 | n/a | 369c8242-6c0f-4b56-b44b-635f1e77234c | unknown | unknown | hooks_log |
 | a064ea743016102d3 | unknown | unknown | n/a | 2026-04-26T22:28:24+07:00 | n/a | 3f2d10b7-e5b1-45a8-9cd1-27316c223c67 | unknown | unknown | hooks_log |
+| a067b18a173c33c53 | unknown | unknown | n/a | 2026-04-28T12:54:54+07:00 | n/a | e21af105-27a2-4758-b47a-b7394de7d927 | unknown | unknown | hooks_log |
 | a069122a48c3c1028 | unknown | unknown | n/a | 2026-04-26T17:57:35+07:00 | n/a | d3c896df-a38f-452c-a744-170ccade9179 | unknown | unknown | hooks_log |
 | a07b11b4d1217f7b5 | unknown | unknown | n/a | 2026-04-26T13:07:27+07:00 | n/a | 9af620c2-5699-4d54-85c6-154a051b0def | unknown | unknown | hooks_log |
 | a081cf09f202041a2 | unknown | unknown | n/a | 2026-04-27T20:29:34+07:00 | n/a | 9d41ddd9-3739-43b4-be09-10acca963da2 | unknown | unknown | hooks_log |
@@ -75,6 +77,7 @@
 | a3177c4d24562db1f | unknown | unknown | n/a | 2026-04-27T23:09:49+07:00 | n/a | b6879d68-ea0e-4f7a-a7ba-7c7d1f7a18f6 | unknown | unknown | hooks_log |
 | a346387322c7498c3 | unknown | unknown | n/a | 2026-04-26T13:16:10+07:00 | n/a | 9af620c2-5699-4d54-85c6-154a051b0def | unknown | unknown | hooks_log |
 | a347c97e07fee1a19 | unknown | unknown | n/a | 2026-04-28T08:40:38+07:00 | n/a | 0c566041-dcaa-4ba4-9607-6a9d41d4e6ba | unknown | unknown | hooks_log |
+| a353d6a0a131132af | unknown | unknown | n/a | 2026-04-28T13:38:10+07:00 | n/a | 685518f2-bc90-47ea-af26-89bc85c5b229 | unknown | unknown | hooks_log |
 | a35b9dfd17e6d40d7 | unknown | unknown | n/a | 2026-04-27T20:18:15+07:00 | n/a | 9d41ddd9-3739-43b4-be09-10acca963da2 | unknown | unknown | hooks_log |
 | a370d2b44d5f2283e | unknown | unknown | n/a | 2026-04-27T17:12:16+07:00 | n/a | 1743e359-37ae-44d5-aee0-5245df1676f2 | unknown | unknown | hooks_log |
 | a37d3b7a92641f7cc | unknown | unknown | n/a | 2026-04-27T05:35:21+07:00 | n/a | 0ee3162b-dac5-4cef-8136-e2f88c34139c | unknown | unknown | hooks_log |
@@ -101,6 +104,8 @@
 | a4bb394f739d4e893 | unknown | unknown | n/a | 2026-04-28T08:36:48+07:00 | n/a | 0c566041-dcaa-4ba4-9607-6a9d41d4e6ba | unknown | unknown | hooks_log |
 | a4bb8c0a51d7cf759 | unknown | unknown | n/a | 2026-04-27T20:59:32+07:00 | n/a | 8f9c74af-ce57-4938-b753-f2fd1346f19c | unknown | unknown | hooks_log |
 | a4bc3150b53c6db23 | unknown | unknown | n/a | 2026-04-27T22:20:07+07:00 | n/a | 2e2385ea-91be-4d46-b5fc-33e80afaed52 | unknown | unknown | hooks_log |
+| a4c235fdf9f9b23eb | unknown | unknown | n/a | 2026-04-28T12:26:47+07:00 | n/a | e21af105-27a2-4758-b47a-b7394de7d927 | unknown | unknown | hooks_log |
+| a4e7c8610910b0738 | unknown | unknown | n/a | 2026-04-28T14:37:14+07:00 | n/a | 5862c7a9-eebc-459b-8a8b-af2cf4de1739 | unknown | unknown | hooks_log |
 | a4f96263b6ab45953 | unknown | unknown | n/a | 2026-04-27T05:50:21+07:00 | n/a | 0ee3162b-dac5-4cef-8136-e2f88c34139c | unknown | unknown | hooks_log |
 | a4fd5f28da196e791 | unknown | unknown | n/a | 2026-04-28T03:57:45+07:00 | n/a | 0c566041-dcaa-4ba4-9607-6a9d41d4e6ba | unknown | unknown | hooks_log |
 | a501fc2d67690b01e | unknown | unknown | n/a | 2026-04-27T13:09:26+07:00 | n/a | 1c150ceb-fa66-4231-859f-391b828d66e6 | unknown | unknown | hooks_log |
@@ -122,7 +127,9 @@
 | a5b44c2f45d9e7128 | unknown | unknown | n/a | 2026-04-26T16:45:35+07:00 | n/a | d3c896df-a38f-452c-a744-170ccade9179 | unknown | unknown | hooks_log |
 | a5bcc2fd266be76a4 | unknown | unknown | n/a | 2026-04-28T02:18:15+07:00 | n/a | 7ce85cd8-c7c1-4bf0-86ba-0b41b962d658 | unknown | unknown | hooks_log |
 | a5c6af235ee9dfb03 | unknown | unknown | n/a | 2026-04-26T11:30:03+07:00 | n/a | 4d3e72a2-0959-4b49-9203-47f84ce4c814 | unknown | unknown | hooks_log |
+| a5cf69aecb7ca8197 | unknown | unknown | n/a | 2026-04-28T14:12:30+07:00 | n/a | 685518f2-bc90-47ea-af26-89bc85c5b229 | unknown | unknown | hooks_log |
 | a5e102928cb744565 | unknown | unknown | n/a | 2026-04-26T11:04:42+07:00 | n/a | 4d3e72a2-0959-4b49-9203-47f84ce4c814 | unknown | unknown | hooks_log |
+| a5e813dc07273df9a | unknown | unknown | n/a | 2026-04-28T14:46:45+07:00 | n/a | 5862c7a9-eebc-459b-8a8b-af2cf4de1739 | unknown | unknown | hooks_log |
 | a5e87c29f1ee32ff7 | unknown | unknown | n/a | 2026-04-27T18:51:44+07:00 | n/a | 5d88a9de-6d17-488f-9ad1-d53c8c032e93 | unknown | unknown | hooks_log |
 | a5ee9f0740679555d | unknown | unknown | n/a | 2026-04-27T23:45:32+07:00 | n/a | b6879d68-ea0e-4f7a-a7ba-7c7d1f7a18f6 | unknown | unknown | hooks_log |
 | a5f60967eef47e4cf | unknown | unknown | n/a | 2026-04-27T08:06:57+07:00 | n/a | fa3ebf64-21bb-4ac5-beb4-4513abbd193b | unknown | unknown | hooks_log |
@@ -134,6 +141,7 @@
 | a65c4a8457983292a | code-quality-reviewer | unknown | n/a | n/a | n/a | n/a | unknown | rejected | budget_tracker |
 | a66ea8e2117505ad1 | sandwich-verifier | opus | n/a | n/a | n/a | n/a | 3.6 | ok | budget_tracker |
 | a684d6368e9c52c9a | unknown | unknown | n/a | 2026-04-28T03:16:42+07:00 | n/a | 369c8242-6c0f-4b56-b44b-635f1e77234c | unknown | unknown | hooks_log |
+| a6a16c2efbf446523 | unknown | unknown | n/a | 2026-04-28T13:14:19+07:00 | n/a | 685518f2-bc90-47ea-af26-89bc85c5b229 | unknown | unknown | hooks_log |
 | a6a40d6b6048ba677 | sandwich-verifier | opus | n/a | n/a | n/a | n/a | 3.6 | ok_with_concerns | budget_tracker |
 | a6a6c61f8b507776c | unknown | unknown | n/a | 2026-04-27T14:47:47+07:00 | n/a | 1743e359-37ae-44d5-aee0-5245df1676f2 | unknown | unknown | hooks_log |
 | a6b418c96d19edaf8 | unknown | unknown | n/a | 2026-04-28T08:46:06+07:00 | n/a | 0c566041-dcaa-4ba4-9607-6a9d41d4e6ba | unknown | unknown | hooks_log |
@@ -190,6 +198,7 @@
 | a9ff430cf04fac064 | unknown | unknown | n/a | 2026-04-27T15:05:51+07:00 | n/a | 1743e359-37ae-44d5-aee0-5245df1676f2 | unknown | unknown | hooks_log |
 | aa137a5746ff25605 | unknown | unknown | n/a | 2026-04-27T21:30:56+07:00 | n/a | 8f9c74af-ce57-4938-b753-f2fd1346f19c | unknown | unknown | hooks_log |
 | aa5e7c088befe4505 | unknown | unknown | n/a | 2026-04-27T23:45:13+07:00 | n/a | b6879d68-ea0e-4f7a-a7ba-7c7d1f7a18f6 | unknown | unknown | hooks_log |
+| aa74a77476bda483b | unknown | unknown | n/a | 2026-04-28T13:01:57+07:00 | n/a | e21af105-27a2-4758-b47a-b7394de7d927 | unknown | unknown | hooks_log |
 | aa8269edf0207bc35 | unknown | unknown | n/a | 2026-04-28T00:39:23+07:00 | n/a | 7ce85cd8-c7c1-4bf0-86ba-0b41b962d658 | unknown | unknown | hooks_log |
 | aa9378d4704b402db | unknown | unknown | n/a | 2026-04-26T13:02:18+07:00 | n/a | 9af620c2-5699-4d54-85c6-154a051b0def | unknown | unknown | hooks_log |
 | aa98c6e9f0e4fd609 | unknown | unknown | n/a | 2026-04-26T11:11:29+07:00 | n/a | 4d3e72a2-0959-4b49-9203-47f84ce4c814 | unknown | unknown | hooks_log |
@@ -197,6 +206,7 @@
 | aaab70d6f388092e4 | unknown | unknown | n/a | 2026-04-28T04:26:45+07:00 | n/a | 0c566041-dcaa-4ba4-9607-6a9d41d4e6ba | unknown | unknown | hooks_log |
 | aaac573265c1149a7 | unknown | unknown | n/a | 2026-04-27T23:31:04+07:00 | n/a | b6879d68-ea0e-4f7a-a7ba-7c7d1f7a18f6 | unknown | unknown | hooks_log |
 | aaf0e8d8fb5f87e90 | unknown | unknown | n/a | 2026-04-26T17:51:12+07:00 | n/a | d3c896df-a38f-452c-a744-170ccade9179 | unknown | unknown | hooks_log |
+| aaf25d37abc5fa7c9 | unknown | unknown | n/a | 2026-04-28T13:45:47+07:00 | n/a | 685518f2-bc90-47ea-af26-89bc85c5b229 | unknown | unknown | hooks_log |
 | aaf7d3616d22faa29 | unknown | unknown | n/a | 2026-04-27T20:57:32+07:00 | n/a | 8f9c74af-ce57-4938-b753-f2fd1346f19c | unknown | unknown | hooks_log |
 | aafda68ca20c1be0c | unknown | unknown | n/a | 2026-04-27T22:52:18+07:00 | n/a | 2e2385ea-91be-4d46-b5fc-33e80afaed52 | unknown | unknown | hooks_log |
 | ab183ff0ec5e37263 | unknown | unknown | n/a | 2026-04-27T21:02:02+07:00 | n/a | 8f9c74af-ce57-4938-b753-f2fd1346f19c | unknown | unknown | hooks_log |
@@ -205,6 +215,7 @@
 | ab4bb760ad2cd0a63 | unknown | unknown | n/a | 2026-04-28T03:29:36+07:00 | n/a | 369c8242-6c0f-4b56-b44b-635f1e77234c | unknown | unknown | hooks_log |
 | ab6e795e9a1be0a74 | unknown | unknown | n/a | 2026-04-27T05:54:55+07:00 | n/a | 0ee3162b-dac5-4cef-8136-e2f88c34139c | unknown | unknown | hooks_log |
 | ab73b1095c9511f1b | unknown | unknown | n/a | 2026-04-26T09:59:31+07:00 | n/a | a503ac99-2c0e-43b3-ad4a-624fedb65800 | unknown | unknown | hooks_log |
+| ab77e1c1a665f5c35 | unknown | unknown | n/a | 2026-04-28T12:14:04+07:00 | n/a | e21af105-27a2-4758-b47a-b7394de7d927 | unknown | unknown | hooks_log |
 | abb782b2564e70517 | unknown | unknown | n/a | 2026-04-27T21:35:48+07:00 | n/a | 8f9c74af-ce57-4938-b753-f2fd1346f19c | unknown | unknown | hooks_log |
 | abc0a5498c49c9e8b | unknown | unknown | n/a | 2026-04-27T06:09:02+07:00 | n/a | 0ee3162b-dac5-4cef-8136-e2f88c34139c | unknown | unknown | hooks_log |
 | abc216ad9e13bbc3d | unknown | unknown | n/a | 2026-04-27T13:20:06+07:00 | n/a | 1c150ceb-fa66-4231-859f-391b828d66e6 | unknown | unknown | hooks_log |
@@ -231,6 +242,8 @@
 | ad182cbbb782b8879 | unknown | unknown | n/a | 2026-04-26T17:41:26+07:00 | n/a | d3c896df-a38f-452c-a744-170ccade9179 | unknown | unknown | hooks_log |
 | ad1bcd704c8843fd7 | unknown | unknown | n/a | 2026-04-27T19:56:02+07:00 | n/a | 48b93c5b-2648-4bba-8c97-72e17cd3f906 | unknown | unknown | hooks_log |
 | ad2cb395e220bf8d4 | unknown | unknown | n/a | 2026-04-26T22:18:29+07:00 | n/a | 3f2d10b7-e5b1-45a8-9cd1-27316c223c67 | unknown | unknown | hooks_log |
+| ad32977e17994116d | unknown | unknown | n/a | 2026-04-28T13:23:45+07:00 | n/a | 685518f2-bc90-47ea-af26-89bc85c5b229 | unknown | unknown | hooks_log |
+| ad33c594d0d2b2b7e | unknown | unknown | n/a | 2026-04-28T13:09:59+07:00 | n/a | 685518f2-bc90-47ea-af26-89bc85c5b229 | unknown | unknown | hooks_log |
 | ad36b0697e48c0f16 | unknown | unknown | n/a | 2026-04-27T23:34:55+07:00 | n/a | b6879d68-ea0e-4f7a-a7ba-7c7d1f7a18f6 | unknown | unknown | hooks_log |
 | ad3df2e9defb6503c | unknown | unknown | n/a | 2026-04-27T08:31:02+07:00 | n/a | fa3ebf64-21bb-4ac5-beb4-4513abbd193b | unknown | unknown | hooks_log |
 | ad3f9deb6e34f9646 | task-implementer | opus | n/a | n/a | n/a | n/a | 3.6 | ok | budget_tracker |
@@ -262,12 +275,14 @@
 | ae8fadaf0be688eb4 | unknown | unknown | n/a | 2026-04-26T22:51:39+07:00 | n/a | 3f2d10b7-e5b1-45a8-9cd1-27316c223c67 | unknown | unknown | hooks_log |
 | ae92dcf8d2882fc9b | unknown | unknown | n/a | 2026-04-26T13:11:04+07:00 | n/a | 9af620c2-5699-4d54-85c6-154a051b0def | unknown | unknown | hooks_log |
 | ae93f226c2d5ac41b | unknown | unknown | n/a | 2026-04-27T23:14:42+07:00 | n/a | b6879d68-ea0e-4f7a-a7ba-7c7d1f7a18f6 | unknown | unknown | hooks_log |
+| ae98c137d683af03d | unknown | unknown | n/a | 2026-04-28T13:52:13+07:00 | n/a | 685518f2-bc90-47ea-af26-89bc85c5b229 | unknown | unknown | hooks_log |
 | ae9e338582e079bc6 | unknown | unknown | n/a | 2026-04-26T17:10:01+07:00 | n/a | d3c896df-a38f-452c-a744-170ccade9179 | unknown | unknown | hooks_log |
 | aeae80a8eefd12be7 | unknown | unknown | n/a | 2026-04-26T13:07:50+07:00 | n/a | 9af620c2-5699-4d54-85c6-154a051b0def | unknown | unknown | hooks_log |
 | aeae92ca3bf4bb920 | unknown | unknown | n/a | 2026-04-28T02:06:44+07:00 | n/a | 7ce85cd8-c7c1-4bf0-86ba-0b41b962d658 | unknown | unknown | hooks_log |
 | aeafc75954add5bb2 | unknown | unknown | n/a | 2026-04-27T22:23:11+07:00 | n/a | 2e2385ea-91be-4d46-b5fc-33e80afaed52 | unknown | unknown | hooks_log |
 | aeb019eb31e718df7 | unknown | unknown | n/a | 2026-04-27T21:19:05+07:00 | n/a | 8f9c74af-ce57-4938-b753-f2fd1346f19c | unknown | unknown | hooks_log |
 | aeb2b7286852f1fa9 | unknown | unknown | n/a | 2026-04-26T10:10:31+07:00 | n/a | a503ac99-2c0e-43b3-ad4a-624fedb65800 | unknown | unknown | hooks_log |
+| aeb3624e40c0df68b | unknown | unknown | n/a | 2026-04-28T14:46:20+07:00 | n/a | 5862c7a9-eebc-459b-8a8b-af2cf4de1739 | unknown | unknown | hooks_log |
 | aec782f9065abf035 | unknown | unknown | n/a | 2026-04-26T13:24:00+07:00 | n/a | 9af620c2-5699-4d54-85c6-154a051b0def | unknown | unknown | hooks_log |
 | aec786f63c4b9e912 | unknown | unknown | n/a | 2026-04-27T15:11:15+07:00 | n/a | 1743e359-37ae-44d5-aee0-5245df1676f2 | unknown | unknown | hooks_log |
 | aef8e0d41178fe0a2 | unknown | unknown | n/a | 2026-04-27T21:46:34+07:00 | n/a | 8f9c74af-ce57-4938-b753-f2fd1346f19c | unknown | unknown | hooks_log |
@@ -288,4 +303,4 @@
 
 ---
 
-_Total rows: 283 — Sources: path-a (SubagentStop hooks), path-b (memory .md agentId citations)_
+_Total rows: 298 — Sources: path-a (SubagentStop hooks), path-b (memory .md agentId citations)_

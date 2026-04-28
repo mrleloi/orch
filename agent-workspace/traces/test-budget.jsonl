@@ -1,0 +1,13 @@
+{"spanName":"dogfood.preflight","status":"preflight_failed","reason":"budget_envelope: cap=50000 exceeds assertion max=1000","envelope_id":"test-budget","timestamp":"2026-04-28T06:12:57.924Z"}
+{"spanName":"dogfood.preflight","status":"preflight_failed","reason":"budget_envelope: cap=50000 exceeds assertion max=1000","envelope_id":"test-budget","timestamp":"2026-04-28T06:13:10.745Z"}
+{"spanName":"dogfood.preflight","status":"preflight_failed","reason":"budget_envelope: cap=50000 exceeds assertion max=1000","envelope_id":"test-budget","timestamp":"2026-04-28T06:14:03.948Z"}
+{"spanName":"dogfood.preflight","status":"preflight_failed","reason":"budget_envelope: cap=50000 exceeds assertion max=1000","envelope_id":"test-budget","timestamp":"2026-04-28T06:14:10.185Z"}
+{"spanName":"dogfood.preflight","status":"preflight_failed","reason":"budget_envelope: cap=50000 exceeds assertion max=1000","envelope_id":"test-budget","timestamp":"2026-04-28T06:16:48.132Z"}
+{"spanName":"dogfood.preflight","status":"preflight_failed","reason":"budget_envelope: cap=50000 exceeds assertion max=1000","envelope_id":"test-budget","timestamp":"2026-04-28T06:16:52.479Z"}
+{"spanName":"dogfood.preflight","status":"preflight_failed","reason":"budget_envelope: cap=50000 exceeds assertion max=1000","envelope_id":"test-budget","timestamp":"2026-04-28T06:17:32.761Z"}
+{"spanName":"dogfood.preflight","status":"preflight_failed","reason":"budget_envelope: cap=50000 exceeds assertion max=1000","envelope_id":"test-budget","timestamp":"2026-04-28T06:20:22.353Z"}
+{"spanName":"dogfood.preflight","status":"preflight_failed","reason":"budget_envelope: cap=50000 exceeds assertion max=1000","envelope_id":"test-budget","timestamp":"2026-04-28T06:20:50.917Z"}
+{"spanName":"dogfood.preflight","status":"preflight_failed","reason":"budget_envelope: cap=50000 exceeds assertion max=1000","envelope_id":"test-budget","timestamp":"2026-04-28T06:23:25.807Z"}
+{"spanName":"dogfood.preflight","status":"preflight_failed","reason":"budget_envelope: cap=50000 exceeds assertion max=1000","envelope_id":"test-budget","timestamp":"2026-04-28T06:36:14.310Z"}
+{"spanName":"dogfood.preflight","status":"preflight_failed","reason":"budget_envelope: cap=50000 exceeds assertion max=1000","envelope_id":"test-budget","timestamp":"2026-04-28T06:48:24.181Z"}
+{"spanName":"dogfood.preflight","status":"preflight_failed","reason":"budget_envelope: cap=50000 exceeds assertion max=1000","envelope_id":"test-budget","timestamp":"2026-04-28T07:07:49.797Z"}

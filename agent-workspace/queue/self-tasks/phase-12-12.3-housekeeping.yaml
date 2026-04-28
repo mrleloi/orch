@@ -1,0 +1,58 @@
+# Phase 12 substage 12.3 — Housekeeping dogfood envelope.
+# Decision 040 §6 G4 closure: ≥1 real Phase 12 substage dispatched through Orch
+# dogfood harness, producing ≥1 real trace file with non-stub spans.
+#
+# Authority chain:
+#   - PROJECT_CHARTER.md
+#   - agent-workspace/memory/decisions/040-cf-dogfood-2-r039-5-user-override.md §6 G4
+#   - agent-workspace/session-plans/pending/phase-12-v2.7-self-application-priority.md §12.3
+#   - agent-workspace/memory/phase-12-routing-brief.md §1 12.3
+#   - agent-workspace/constitution/self-application-bootstrap.md §6 (C2/C3 contract)
+#
+# Pivot rationale: routing-brief default `CF-V2.7-SC39-POLL-LINES-TIMEOUT-FLAKE`
+# does NOT exist in `scripts/audit/settings-version-check.sh` (no poll_lines, no
+# timeout, no read-while-loop). Pivoted to a sibling `CF-V2.7-SC39-SETTINGS-
+# VERSION-CHECK-HASH-FIXES` micro-fix (line-19 ERR trap removal) — same script,
+# same housekeeping bucket, single-line bash delta. Documented in §1 of
+# observation file task-12.3-20260428-self-applied.md.
+
+envelope_id: phase-12-12.3-housekeeping
+schema_version: "1"
+
+tenancy:
+  user: self
+  project: orch
+  is_self_app: true
+
+subagent_type: task-implementer
+model: sonnet
+effort: low
+
+prompt_path: tasks/phase-12/12.3-housekeeping-prompt.md
+dispatch_trace_path: agent-workspace/traces/dogfood-phase-12-12.3-housekeeping.jsonl
+rollback_marker_path: agent-workspace/memory/.dogfood-stop
+budget_cap_tokens: 30000
+
+handoff:
+  prior_substage: "12.1"
+  expected_output_path: scripts/audit/settings-version-check.sh
+
+preflight_assertions:
+  - kind: tenancy_lock
+    expect_user: self
+    expect_project: orch
+  - kind: budget_envelope
+    max_tokens: 120000
+
+metadata:
+  authoring_phase: 12
+  authoring_substage: "12.3"
+  master_plan_ref: agent-workspace/session-plans/pending/phase-12-v2.7-self-application-priority.md
+  routing_brief_ref: agent-workspace/memory/phase-12-routing-brief.md
+  triggered_by: substage 12.3 dogfood checkpoint C2 (first real self-applied substage)
+  dogfood_checkpoint: C2
+  decision_authority: agent-workspace/memory/decisions/040-cf-dogfood-2-r039-5-user-override.md
+  closes_gate: G4
+  housekeeping_target: scripts/audit/settings-version-check.sh
+  housekeeping_carryforward: CF-V2.7-SC39-SETTINGS-VERSION-CHECK-HASH-FIXES
+  ccs_profile: loilekiaisoftcomvn

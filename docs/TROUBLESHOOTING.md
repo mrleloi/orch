@@ -599,7 +599,178 @@ Don't resume until `escalation.md` is explicitly removed — it's the signal tha
 
 If all else fails:
 
-1. `git stash` any uncommitted work
+1. `git stash` any uncommitted work *(but read §git-stash-incident first)*
 2. Restart Claude Code session
 3. Paste: `Read CLAUDE.md, autonomous-protocol.md, and current-execution.md. Tell me where we are and what the next step is. Do not take any action.`
 4. Based on diagnosis, give a targeted instruction
+
+---
+
+## Runtime + dispatch errors (v2.7+)
+
+### ccs delegation not configured
+
+**Symptom**: dogfood harness spawns a subprocess and trace shows:
+
+```
+ccs exited with code 1: [X] Profile '<name>' is not configured for delegation
+    Profile not found: <name>
+    Run: ccs doctor
+    Or configure: C:\Users\PC\.ccs/<name>.settings.json
+```
+
+**Cause**: `ClaudeCodeAdapter.spawn()` in ccs mode invokes `ccs <profile> -p
+<prompt> ...` and ccs requires a delegation-grade profile in
+`~/.ccs/profiles.json`. An *instance* (account) is not the same as a
+*delegation profile*.
+
+**Fix path A — single-account operator** (recommended): set
+`ORCH_RUNTIME_MODE=subscription`. The adapter spawns `claude --rc <name>`
+directly, bypassing ccs delegation. Uses your `~/.claude/` subscription
+credentials. No API key needed.
+
+```bash
+export ORCH_RUNTIME_MODE=subscription
+ORCH_DOGFOOD_EXECUTE=true npx tsx scripts/dogfood/run-self-task.ts \
+  --envelope <path/to/envelope.yaml>
+```
+
+**Fix path B — multi-account operator**: configure a delegation profile.
+
+```bash
+ccs sync                                              # install delegation skill
+ccs api create <profile-name> --preset anthropic \
+  --api-key sk-ant-...
+ccs doctor                                            # verify "Profiles 1+ configured"
+```
+
+Path B costs API tokens (charged per call). Path A uses subscription quota
+(no incremental charge). Solo operators almost always want Path A.
+
+### `npx tsx scripts/...` cannot resolve `packages/core/...`
+
+**Symptom**:
+
+```
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module '...envelope-schema.js'
+imported from '...packages/core/src/dogfood/...'
+```
+
+**Cause**: `packages/core/` does not declare `"type": "module"`. `tsx` treats
+imports as ESM and cannot resolve `./foo.js` paths to `.ts` files in CJS
+packages.
+
+**Workaround**: invoke through vitest:
+
+```bash
+ORCH_DOGFOOD_EXECUTE=true npx vitest run \
+  --config vitest.config.ts scripts/dogfood/run-self-task.ts
+```
+
+Or wire a `pnpm dogfood:run-self-task` script entry that builds the package
+first. Tracked as `CF-V2.7-12.3-TSX-ESM-RESOLUTION`.
+
+### Dogfood spawn fails
+
+**Symptom**: trace shows `dogfood.subprocess_spawn` (real `pid` present) but
+`session_id` is empty and the next span is `status: error`.
+
+**Diagnosis order**:
+
+1. Read the error message in the error span. If it's the ccs delegation
+   error, see §ccs-delegation-not-configured.
+2. Check the binary is on PATH inside the spawned env: `which claude` /
+   `which ccs` from the same shell that started the daemon.
+3. Check `claude --version` — too-old CLI may not recognize `--rc`.
+4. Check the prompt path referenced in the envelope exists and is readable.
+5. If subscription mode + `claude --rc` still fails: run
+   `claude --rc test-session -p "say hi" --output-format stream-json`
+   manually. If THAT fails, your `~/.claude/` credentials are the issue, not
+   Orch.
+
+---
+
+## Test + harness errors (v2.7+)
+
+### Pre-existing hook test failures
+
+**Symptom**: `pnpm test` reports failures in
+`tests/hooks/dispatch-recorder.spec.ts` (10 failures) and/or
+`tests/hooks/component-telemetry.spec.ts` (5 failures).
+
+**Diagnosis**: these failures pre-date v2.7 — captured as a known regression
+from Phase 11. They do NOT block v2.7 work or block your use of Orch.
+
+**Action**: tracked under v2.7 housekeeping. For green CI, either exclude
+the files or wait for the 12.9 batch.
+
+```bash
+pnpm vitest --exclude 'tests/hooks/dispatch-recorder.spec.ts,tests/hooks/component-telemetry.spec.ts'
+```
+
+### Trace files leaking into `agent-workspace/traces/` after test runs
+
+**Symptom**: `git status` post-`pnpm test` shows `?? agent-workspace/traces/`
+with files like `test-happy-path.jsonl`, `test-tenancy.jsonl`.
+
+**Cause**: `tests/dogfood/run-self-task.spec.ts` T3-T10 hardcode trace paths
+to the real repo tree instead of `tmpDir`. Tracked as
+`CF-V2.7-12.1-DOGFOOD-TEST-TRACE-CLEANUP`.
+
+**Fix (manual cleanup)**:
+
+```bash
+rm -f agent-workspace/traces/test-*.jsonl
+```
+
+Or wait for the 12.9 fix that moves trace paths into tmpdir.
+
+---
+
+## Git + stash incidents
+
+### git-stash-incident
+
+**Symptom**: a task-implementer subagent ran `git stash` (often to verify a
+test was pre-existing) and then `git stash pop` failed due to a conflict on
+an auxiliary file — typically `agent-workspace/memory/component-telemetry.jsonl`
+which mutates per-dispatch. The stash drops or stays in `git stash list`, and
+primary edits are silently lost.
+
+**Real example (12.1 impl, Phase 12 v2.7)**: two concurrent task-implementers
+both ran `git stash` during overlapping windows. One finished and claimed
+DONE_WITH_CONCERNS, but disk reverted to HEAD. Three leftover stashes
+(`stash@{0,1,2}`) accumulated. The second implementer eventually recovered
+its work with `git checkout stash@{0} -- <files>`.
+
+**Prevention** (now enforced in subagent prompts):
+
+> Subagents MUST NOT run `git stash` unless explicitly authorized. Edit files
+> directly. For baseline comparison, use `git diff` (read-only).
+
+**Recovery if stashes have accumulated**:
+
+```bash
+git stash list                              # inspect
+git stash show -p stash@{0} > /tmp/s0.diff  # peek (read-only)
+git stash drop stash@{0}                    # remove (DESTRUCTIVE — verify first)
+```
+
+Do not blindly `git stash drop`; the orchestrator may have already recovered
+work with `git checkout stash@{N} -- <files>`.
+
+### Concurrent subagents racing on the same file
+
+**Symptom**: two task-implementers both edit the same production file within
+seconds of each other; one's work overwrites the other; observation files
+describe consistent outcomes but `git diff` shows zero changes (both reverts
+cancelled out).
+
+**Cause**: dispatching a re-attempt while the original subagent is still
+alive. `/clear` does NOT kill background CLI subprocess subagents — they
+outlive the Claude Code session.
+
+**Prevention**: before re-dispatching a task that's "in flight", check
+`agent-workspace/memory/.transcript-tokens` and wait for the bg notification
+confirming the original returned. If you must re-dispatch, do so AFTER the
+original returns AND AFTER you've verified disk state with `git diff --stat`.

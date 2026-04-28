@@ -16,7 +16,6 @@
 # session would be inert (read-once). Wire --init in v2.7 after a fresh session boot.
 
 set -uo pipefail
-trap 'exit 0' ERR
 
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "$0")/../.." && pwd)}"
 SETTINGS_FILE="${PROJECT_DIR}/.claude/settings.json"

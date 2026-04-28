@@ -1,26 +1,13 @@
 /**
  * run-self-task.ts — Dogfood harness CLI.
  *
- * Reads a self-task envelope YAML from agent-workspace/queue/self-tasks/<id>.yaml,
- * validates it via zod schema, runs preflight assertions, and dispatches via a
- * mock IAgentRuntime (real dispatch wired in 8.5.3 once SessionManager is targeted).
+ * Reads a self-task envelope YAML, validates via zod, runs preflight assertions,
+ * and dispatches via IAgentRuntime gated by ORCH_DOGFOOD_EXECUTE env flag (default OFF).
  *
- * Algorithm per spec §4.2 (self-application-bootstrap.md):
- *   1. Parse envelope YAML via zod
- *   2. Check rollback marker → exit 0 (graceful no-op)
- *   3. Run preflight_assertions → exit 2 on failure
- *   4. Check parent sentinel (ORCH_DOGFOOD_PARENT_OK=1) → exit 3
- *   5. Resolve tenancy scope via ScopeResolver
- *   6. Read + prepend <orch-self-app-rules> block to prompt
- *   7. Validate dispatch_trace_path prefix
- *   8. Open OTEL root span dogfood.dispatch_substage (11 mandatory attrs)
- *   9. Dispatch (wired in 8.5.3; logged and no-op in 8.5.2)
- *  10. Stream trace events to dispatch_trace_path
- *  11. Close span; return exit code
+ * Algorithm per spec §4.2: parse → rollback-check → preflight → sentinel-check
+ * → scope-resolve → prompt-build → trace-path-validate → OTEL-span → dispatch.
  *
- * LOC budget: ≤350 production lines (spec §7 §8c).
- * Tracer reuse: TracingService from @orch/core — no new tracer code (forbidden).
- * Tenancy: ScopeResolver from @orch/core — no modifications to that module.
+ * Tracer reuse: TracingService from @orch/core. Tenancy: ScopeResolver from @orch/core.
  */
 
 import * as fs from 'node:fs';
@@ -35,6 +22,10 @@ import {
 } from '../../packages/core/src/dogfood/envelope-schema.js';
 import { ScopeResolver } from '../../packages/core/src/tenancy/scope-resolver.js';
 import { TracingService } from '../../packages/core/src/modules/tracing/tracing.service.js';
+import type {
+  IAgentRuntime,
+  RuntimeHandle,
+} from '../../packages/core/src/domain/types/runtime.js';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -45,6 +36,9 @@ const PARENT_SENTINEL = 'ORCH_DOGFOOD_PARENT_OK';
 
 /** Nested dogfood depth env var — T4 safeguard (§2.4). */
 const DOGFOOD_DEPTH_ENV = 'ORCH_DOGFOOD_DEPTH';
+
+/** Real-spawn execution flag — Option D (Decision 040 §6 G3). Default OFF for safety. */
+const DOGFOOD_EXECUTE_ENV = 'ORCH_DOGFOOD_EXECUTE';
 
 /** Maximum nesting depth allowed (spec §2.4). */
 const MAX_DOGFOOD_DEPTH = 1;
@@ -213,17 +207,93 @@ function parseSubstageFromId(envelopeId: string): string {
   return m !== null ? m[1]! : envelopeId;
 }
 
-// ---------------------------------------------------------------------------
-// Main harness entry-point
-// ---------------------------------------------------------------------------
+/** Default IAgentRuntime factory — lazy to avoid NestJS cold-path cost when flag is OFF. */
+async function defaultRuntime(): Promise<IAgentRuntime> {
+  const { ClaudeCodeAdapter } = await import(
+    '../../packages/core/src/modules/sessions/claude-code-adapter.js'
+  );
+  const { TracingService: TracingSvc } = await import(
+    '../../packages/core/src/modules/tracing/tracing.service.js'
+  );
+  return new ClaudeCodeAdapter(new TracingSvc());
+}
 
 /**
- * Run a self-task envelope end-to-end.
- *
- * Returns an exit code matching the spec §4.3 degradation matrix.
- * Never throws — all errors are caught and translated to exit codes.
+ * dispatchViaRuntime — flag-ON path: wire real IAgentRuntime.spawn().
+ * Side-effect-narrow: no tracer or scope refs, only runtime + envelope + log.
  */
-export async function runSelfTask(envelopePath: string): Promise<number> {
+async function dispatchViaRuntime(
+  runtimeOrUndef: IAgentRuntime | undefined,
+  envelope: DogfoodEnvelope,
+  fullPrompt: string,
+  childEnv: NodeJS.ProcessEnv,
+  tracePath: string,
+  log: (msg: string) => void,
+): Promise<void> {
+  const runtime = runtimeOrUndef ?? (await defaultRuntime());
+  const profile = (envelope.metadata?.['ccs_profile'] as string | undefined) ?? 'default';
+
+  let handle: RuntimeHandle;
+  try {
+    handle = await runtime.spawn({
+      profile,
+      prompt: fullPrompt,
+      env: childEnv as Record<string, string>,
+    });
+  } catch (err) {
+    log(`runtime-spawn-failed: ${err instanceof Error ? err.message : String(err)}`);
+    appendTrace(tracePath, {
+      spanName: 'dogfood.subprocess_spawn',
+      attrs: {
+        subagent_type: envelope.subagent_type,
+        model: envelope.model,
+        effort: envelope.effort,
+        budget_cap_tokens: envelope.budget_cap_tokens,
+        prompt_length: fullPrompt.length,
+        spawn_error: err instanceof Error ? err.message : String(err),
+      },
+      timestamp: new Date().toISOString(),
+      status: 'error',
+    });
+    throw err; // propagate → outer catch → SPAWN_FAILED (exit 4)
+  }
+
+  log(`runtime-spawned pid=${handle.pid} sessionId=${handle.sessionId || '(pending)'}`);
+  // Stream drain — log first 200 chars per chunk; memory-bounded.
+  handle.stdout.on('data', (chunk: Buffer) => {
+    log(`stdout: ${chunk.toString('utf8').slice(0, 200)}`);
+  });
+  handle.stderr.on('data', (chunk: Buffer) => {
+    log(`stderr: ${chunk.toString('utf8').slice(0, 200)}`);
+  });
+
+  // Emit trace BEFORE awaiting — makes hangs observable via JSONL tail (INV-10).
+  appendTrace(tracePath, {
+    spanName: 'dogfood.subprocess_spawn',
+    attrs: {
+      subagent_type: envelope.subagent_type,
+      model: envelope.model,
+      effort: envelope.effort,
+      budget_cap_tokens: envelope.budget_cap_tokens,
+      prompt_length: fullPrompt.length,
+      pid: handle.pid,
+      session_id: handle.sessionId || '',
+      flag_off: false,
+    },
+    timestamp: new Date().toISOString(),
+  });
+
+  await runtime.awaitAndClassify(handle);
+  log(`runtime-completed pid=${handle.pid}`);
+}
+
+/** Run a self-task envelope end-to-end. Returns spec §4.3 exit codes. Never throws.
+ *  Test callers inject `runtime`; production passes undefined (defaultRuntime() used
+ *  when ORCH_DOGFOOD_EXECUTE=true). */
+export async function runSelfTask(
+  envelopePath: string,
+  runtime?: IAgentRuntime,
+): Promise<number> {
   const log = (msg: string): void => {
     process.stderr.write(`[dogfood] ${new Date().toISOString()} ${msg}\n`);
   };
@@ -376,19 +446,35 @@ export async function runSelfTask(envelopePath: string): Promise<number> {
           log(`prompt-length=${fullPrompt.length} traceparent=${envWithTrace['TRACEPARENT'] ?? 'none'}`);
           log(`scope=${scopePath}`);
 
-          appendTrace(tracePath, {
-            spanName: 'dogfood.subprocess_spawn',
-            attrs: {
-              subagent_type: envelope.subagent_type,
-              model: envelope.model,
-              effort: envelope.effort,
-              budget_cap_tokens: envelope.budget_cap_tokens,
-              prompt_length: fullPrompt.length,
-              // Real IAgentRuntime.spawn() wired in 8.5.3
-              dispatch_deferred_to: '8.5.3',
-            },
-            timestamp: new Date().toISOString(),
-          });
+          // Strict '=== true' guard: Boolean('false') is truthy — not what we want.
+          const executeReal = process.env[DOGFOOD_EXECUTE_ENV] === 'true';
+
+          if (!executeReal) {
+            // Flag OFF (default) — emit stub-mode trace; no real spawn.
+            appendTrace(tracePath, {
+              spanName: 'dogfood.subprocess_spawn',
+              attrs: {
+                subagent_type: envelope.subagent_type,
+                model: envelope.model,
+                effort: envelope.effort,
+                budget_cap_tokens: envelope.budget_cap_tokens,
+                prompt_length: fullPrompt.length,
+                flag_off: true,
+              },
+              timestamp: new Date().toISOString(),
+            });
+            return;
+          }
+
+          // Flag ON — wire real IAgentRuntime.spawn() (test injects mock; CLI uses factory).
+          await dispatchViaRuntime(
+            runtime,
+            envelope,
+            fullPrompt,
+            envWithTrace,
+            tracePath,
+            log,
+          );
         });
 
         await tracer.withSpan('dogfood.trace_close', async (span) => {

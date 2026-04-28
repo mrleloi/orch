@@ -60,6 +60,29 @@ guard is needed.
 | `LANGFUSE_PUBLIC_KEY` | _(none)_ | `string` | Langfuse project public key. Required when `ORCH_TRACE_BACKEND=langfuse`. |
 | `LANGFUSE_SECRET_KEY` | _(none)_ | `string` | Langfuse project secret key. Required when `ORCH_TRACE_BACKEND=langfuse`. |
 
+### Runtime mode (subprocess spawn target)
+
+Controls whether `ClaudeCodeAdapter.spawn()` invokes `ccs <profile>` (default,
+multi-account) or `claude --rc <name>` directly (single-account subscription).
+
+| Variable | Default | Type | Description |
+|---|---|---|---|
+| `ORCH_RUNTIME_MODE` | `ccs` (implicit) | `enum` | `subscription` → spawn `claude --rc <name>` directly using `~/.claude/` credentials; bypasses ccs delegation. Any other value (or unset) → existing ccs-mode behavior (`ccs <profile> -p <prompt>`). Use `subscription` if you have one Anthropic subscription account and don't want to configure ccs delegation profiles. |
+| `ORCH_DOGFOOD_EXECUTE` | _(unset → flag-OFF)_ | `string` | When set to literal `true`, the dogfood harness in `scripts/dogfood/run-self-task.ts` invokes a real `IAgentRuntime.spawn()` at step-9 (the self-application moment). Any other value (or unset) keeps the harness in stub mode (writes a flag-off trace, no spawn). Default OFF for safety; turn ON only for autonomous self-applied substages. Pairs with `ORCH_RUNTIME_MODE=subscription` for solo operators. |
+
+**Picking a runtime mode**:
+
+- One subscription, no API keys → `ORCH_RUNTIME_MODE=subscription`. Uses your
+  subscription quota; no incremental charge.
+- Multiple accounts to failover between → leave `ORCH_RUNTIME_MODE` unset (or
+  set explicitly to `ccs`). Configure ccs delegation profiles
+  (`ccs api create <name> --preset anthropic --api-key sk-ant-...`).
+- Mixed dev / prod → use subscription mode locally, ccs mode in
+  CI / production where delegation profiles are pre-provisioned.
+
+See [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) §ccs-delegation-not-configured
+if you hit the "Profile not configured for delegation" error.
+
 ### Development / Test Only
 
 These variables are **not validated by `envSchema`** and have no effect in production.

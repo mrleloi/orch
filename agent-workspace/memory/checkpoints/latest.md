@@ -1,79 +1,133 @@
-# Checkpoint — Phase 11 v2.6 burndown — Session #47 (11.6 closed; 11.7 whole-phase verifier in flight)
+# Checkpoint — Phase 12 v2.7 — Session #50 (USER PIVOT to dogfood E2E + user docs)
 
-Created: 2026-04-28 session #47.
-Status: **11.6 CLOSED (F-2 re-defer); 11.7 attestation + COMMIT_EDITMSG_v2.6 authored; whole-phase sandwich-verifier dispatched bg `ab77e1c1a665f5c35` opus/medium.**
+Created: 2026-04-28 session #50.
+Status: **User issued top-priority pivot 2026-04-28: (1) Make Orch ACTUALLY self-apply (12.3 only mechanically met G4 — needs ccs delegation OR ORCH_RUNTIME_MODE=subscription); (2) Author user-guide docs shareable to another dev. Adapter patched + 4 doc files authored inline. E2E verification + remaining docs gated on Anthropic quota reset (6:50pm Asia/Saigon).**
 
-## Phase 11 substage status
+## What landed in Session #50
+
+### Adapter patch (subscription-mode fallback)
+
+- `packages/core/src/modules/sessions/claude-code-adapter.ts`:
+  - `spawn()` now branches on `process.env.ORCH_RUNTIME_MODE === 'subscription'`:
+    - Subscription mode: `execa('claude', ['--rc', \`orch-${profile||'self'}\`, '-p', prompt, '--output-format', 'stream-json'])` — uses `~/.claude/` credentials directly; no ccs delegation profile required
+    - Default (ccs mode): unchanged — `execa('ccs', [profile, '-p', prompt, '--output-format', 'stream-json'])`
+  - Module-header comment (line 5-6) updated to reflect both spawn paths
+- `resume()` NOT yet patched — subscription-mode resume gated to v2.8 (post-v2.7 carryforward)
+- **Tests NOT yet added** — gated on quota reset; spec needs 2-3 new tests covering the subscription branch
+
+### Docs landed
+
+- `docs/README.md` (NEW; ~150 LOC) — landing page + sharing entry point, architecture ASCII diagram, capability status table (stable/scaffolded/gated), index of all docs
+- `docs/apply-to-your-project.md` (NEW; ~250 LOC) — the explicit "send to another dev" use case; 10-step migration recipe; reuse-vs-fresh table; runtime-mode picker; common gotchas
+- `docs/TROUBLESHOOTING.md` (UPDATED; +180 LOC appended) — new sections: ccs-delegation-not-configured (both fix paths A/B), tsx ESM resolution gap, dogfood-spawn-fails diagnostic, pre-existing hook test failures, trace file leakage, git-stash-incident with real example from 12.1 race, concurrent-subagents-racing
+- `docs/configuration.md` (UPDATED; +25 LOC) — new Runtime Mode section documenting `ORCH_RUNTIME_MODE=subscription` and `ORCH_DOGFOOD_EXECUTE`
+
+### Disk-truth verification commands (run anytime to confirm)
+
+```bash
+grep -n "ORCH_RUNTIME_MODE" packages/core/src/modules/sessions/claude-code-adapter.ts
+# Expect: 1+ matches (line ~287 area, in spawn())
+
+ls docs/README.md docs/apply-to-your-project.md
+# Expect: both exist
+
+grep -c "ccs-delegation-not-configured\|git-stash-incident\|ORCH_RUNTIME_MODE" docs/TROUBLESHOOTING.md docs/configuration.md
+# Expect: ≥3 (TROUBLESHOOTING) + ≥2 (configuration)
+```
+
+## Phase 12 substage status
 
 | Substage | Status | Evidence |
 |---|---|---|
-| 11.0 routing brief | ✅ DONE | `phase-11-routing-brief.md` |
-| 11.1 hygiene batch | ✅ DONE | 11 CFs closed; Decision 038 |
-| 11.2 audit-trail | ✅ DONE_WITH_CONCERNS | new skill `observation-file-write-on-return` |
-| 11.3 CF-DOGFOOD-2 | ✅ DEFER_V2.7 | Decision 039 |
-| 11.4 mid-verify | ✅ ALL_PASS 8/8 | `audits/phase-11-mid-verify.md` |
-| 11.5.1 architect | ✅ DONE | `session-plans/pending/11.5-sc39-r1-r3-architect.md` (387 LOC) |
-| 11.5.2 IMPL | ✅ DONE_WITH_CONCERNS | 4 deliverables Δ1-Δ4 |
-| 11.5.2 spec-compliance | ✅ PASS_WITH_CONCERNS | 14/14 |
-| 11.5.2 code-quality | ✅ APPROVED_WITH_CONCERNS | 6 CFs |
-| 11.5.3 Decision 037 | ✅ BINDING DEFER_V2.7 | `decisions/037-sc39-retry-verdict-v2.6.md` (40861 bytes) |
-| 11.5.3 sandwich-verifier | ✅ APPROVED | `observations/task-11.5-20260428-sandwich-verifier.md` (12823 bytes; 0 critical / 0 important / 1 minor) |
-| 11.6 F-2 re-defer | ✅ DEFER_V2.7 | `audits/f2-self-evolution-disposition-v2.6.md` (orchestrator-absorbed ~50 LOC) |
-| 11.7 attestation | ✅ DONE | `phase-11-complete.md` + `.git/COMMIT_EDITMSG_v2.6` |
-| 11.7 whole-phase verifier | 🟡 IN FLIGHT | bg `ab77e1c1a665f5c35` (opus/medium ~80K) |
-| 11.7 commit + tag | ⏳ PENDING | gated on verifier APPROVED |
+| 12.0 master plan + routing brief | ✅ DONE | `phase-12-v2.7-self-application-priority.md` + `phase-12-routing-brief.md` |
+| 12.1 step-9 wire | ✅ APPROVED_WITH_CONCERNS | spec PASS_WITH_CONCERNS (1 minor); quality APPROVED_WITH_CONCERNS (0c/2i/2n) |
+| 12.2 audit + A.9 wire | ✅ APPROVED_WITH_CONCERNS | quality APPROVED_WITH_CONCERNS (0c/2i/2n) |
+| 12.3 dogfood self-application | ⚠️ DONE_WITH_CONCERNS — TRUE E2E PENDING | trace + Decision 041 BINDING (351 LOC) but housekeeping fix landed via orchestrator-fallback (ccs delegation gap); subscription-mode adapter patch lands the code path, true E2E verification gated on quota reset |
+| **12.D-1 (NEW)** subscription-mode adapter + true E2E | 🟡 IN PROGRESS | adapter patched; tests + E2E run gated on quota reset 6:50pm Asia/Saigon |
+| **12.D-2 (NEW)** user-guide docs | 🟡 IN PROGRESS | 4 files done (README, apply-to-your-project, TROUBLESHOOTING update, configuration update); components.md + glossary.md remaining |
+| 12.4 SC-39 W-1 fix | ⏸️ DEFERRED behind 12.D-1/12.D-2 per user pivot |
+| 12.5 multi-user namespace | ⏸️ DEFERRED |
+| 12.6 community sharing prep | ⏸️ DEFERRED |
+| 12.7 mid-verify | ⏸️ DEFERRED |
+| 12.8 F-2 disposition | ⏸️ DEFERRED |
+| 12.9 housekeeping | ⏸️ DEFERRED — concerns from 12.1/12.2/12.3 already routed |
+| 12.10 phase-close + bundled commit | ⏸️ DEFERRED |
 
-## Verify gates already green
+## NEXT ACTION (Session #51 — post-quota-reset)
 
-- post-phase.sh --phase 11 → ALL_PASS 8/8 (`audits/phase-11-verify.md`)
-- oss-readiness.sh → PASS exit 0
-- pnpm test → 1512 PASS / threshold 1302 cleared by +210
-- 11.5.3 verifier APPROVED (12,823 bytes; 0 critical / 0 important)
-- charter-coherence-spot-check → clean
-
-## P8 minor concern from 11.5.3 verifier — RESOLVED orchestrator-side
-
-CF-V2.7-SC39-POLL-LINES-TIMEOUT-FLAKE was preserved in Decision 037 §7.6 but missing from carryforwards-v2.7.md working list. Appended at 11.7 entry; entry now visible at carryforwards-v2.7.md tail.
-
-## NEXT ACTION
-
-### Priority 1 — On `ab77e1c1a665f5c35` (whole-phase sandwich-verifier) return
-
-1. Verify `agent-workspace/memory/observations/task-11.7-20260428-sandwich-verifier.md` exists ≥ 4000 bytes.
-2. Read verdict from YAML completion block:
-   - **APPROVED** → fire single bundled commit + tag (Priority 2).
-   - **APPROVED_WITH_CONCERNS** → if 0 critical, ≤2 important: fire commit+tag and route concerns to v2.7 working list.
-   - **BLOCKED** → hold; route to narrow fix cycle ≤40K before retrying commit.
-
-### Priority 2 — On APPROVED, execute commit + tag (per user standing grant 2026-04-28)
+### Priority 1 — Verify subscription-mode E2E
 
 ```bash
 cd C:/htdocs/orch-starter
-git add -A
-git commit -F .git/COMMIT_EDITMSG_v2.6
-git tag v2.6
-git log --oneline | wc -l   # expect 4 (init + v2.5 + signoff + v2.6)
-git tag --list              # expect: v2.5, v2.6
+ORCH_RUNTIME_MODE=subscription ORCH_DOGFOOD_EXECUTE=true \
+  npx tsx scripts/dogfood/run-self-task.ts \
+  --envelope agent-workspace/queue/self-tasks/phase-12-12.3-housekeeping.yaml \
+  2>&1 | tee agent-workspace/traces/dogfood-phase-12-12.3-real-e2e.log
+
+# Verify trace file
+cat agent-workspace/traces/dogfood-phase-12-12.3-real-e2e.jsonl | head
+# Look for: dogfood.subprocess_spawn span with NON-EMPTY session_id, flag_off=false
+# AND status: ended/complete (NOT status: error)
+# AND the housekeeping fix is observable in `git diff` (NOT applied by orchestrator)
 ```
 
-NO push. Local commit + tag only. NO --no-verify. NO --amend.
+If npx tsx still hits the ESM resolution gap (CF-V2.7-12.3-TSX-ESM-RESOLUTION),
+fall back to vitest driver:
 
-### Priority 3 — Post-commit hygiene
+```bash
+ORCH_RUNTIME_MODE=subscription ORCH_DOGFOOD_EXECUTE=true \
+  npx vitest run --config vitest.config.ts \
+  tests/dogfood/12.3-real-dispatch.spec.ts
+```
 
-1. Update `agent-workspace/memory/current-execution.md` to mark Phase 11 COMPLETE; advance to Phase 12 (v2.7).
-2. Append final session row to `agent-workspace/memory/budget-tracker.md`.
-3. Author session note `sessions/2026-04-28-task-11.7-phase-close.md`.
-4. Promote `carryforwards-v2.7.md` to consolidated final form (open-v2.7 list).
-5. Optional: dispatch `master-planner` for Phase 12 / v2.7 plan.
+### Priority 2 — Add adapter tests
+
+`packages/core/src/modules/sessions/claude-code-adapter.spec.ts` — add 2-3 tests:
+- `spawn() with ORCH_RUNTIME_MODE=subscription invokes 'claude' with --rc args`
+- `spawn() without ORCH_RUNTIME_MODE invokes 'ccs' with profile`
+- `spawn() with ORCH_RUNTIME_MODE=other-value falls back to ccs`
+
+Mock `execa` to assert the command + args; existing test patterns in the same
+file are good templates.
+
+### Priority 3 — Update Decision 041 §8 with TRUE E2E attestation
+
+Append to `agent-workspace/memory/decisions/041-cf-dogfood-2-closure-attestation.md`:
+- §8 cite the E2E trace path
+- Confirm session_id non-empty, flag_off=false
+- Confirm housekeeping fix landed via dogfood-spawned subagent (NOT orchestrator-fallback)
+- Upgrade verdict §1 from "DONE_WITH_CONCERNS" hint to clean DONE if applicable
+
+### Priority 4 — Author remaining docs (optional)
+
+- `docs/components.md` — subagents/skills/hooks reference table (existing
+  architecture.md partially covers; this would be the explicit dev-onboarding
+  reference)
+- `docs/glossary.md` — short-form vocabulary
+- `docs/install.md` — currently DAY_1_CHECKLIST.md serves; could rename + extend
+
+These are nice-to-haves; the docs/ tree as of Session #50 is already
+shareable to another dev per user request.
 
 ## Wind-down state
 
-Real transcript at checkpoint write: ~30K (very fresh post-reboot). Wind-down at 200K. Cliff at 230K. Plenty of headroom (~170K) for whole-phase verifier return + commit/tag execution.
+Real transcript at Session #50 close: ~70K (Session #50 began at 41K post-restart).
+Wind-down at 200K. Cliff at 230K. Session #50 deliberately stayed lean since
+both subagents quota-failed and inline-work-only was the path forward.
 
-If wind-down fires before whole-phase verifier returns: read this file as resume context. The `ab77e1c1a665f5c35` bg is the critical pending dispatch.
+**Quota reset**: 6:50pm Asia/Saigon (~4 hours from session #50 start).
+Session #51 should resume with quota available.
 
-## v2.5 release (preserved for traceability)
+## v2.7 carryforwards (unchanged from prior checkpoint)
 
-- Commit: `92f50ec v2.5: Phase 9 close + Phase 10 v2.5 carryforward burndown`
-- Signoff: `2a395d5 Signed-off-by: Frank.le <frank.le@nifi-is.com>`
-- Tag: `v2.5`
+All 9 carryforwards still queued for 12.9 housekeeping batch. The 3
+12.3 carryforwards (CCS-DELEGATION-ENV, TSX-ESM-RESOLUTION, DOGFOOD-FALLBACK-CAVEAT)
+are partially addressed by the subscription-mode adapter patch — but remain
+open until E2E verification confirms the fallback caveat is dissolved.
+
+## I-6 status
+
+Zero `git commit` invocations across Phase 12. All staged in index. Next commit
+gated on 12.10 sandwich-verifier APPROVED per autonomous standing grant
+2026-04-28. The user-pivot work (12.D-1/12.D-2) bundles into the same v2.7
+release commit at 12.10.

@@ -15,6 +15,10 @@
  *   T9: Failure-mode matrix entry 2 — preflight i6_grep fails → exits 2 (PREFLIGHT_FAILED)
  *   T10: Failure-mode matrix entry 3 — budget_envelope assertion exceeds → exits 2
  *   T11: TracingService reuse — no new tracer instances in production code (import check)
+ *   T12: Flag OFF (default) → stub trace, no IAgentRuntime.spawn call
+ *   T13: Flag ON + mock spawn resolves → real spawn record, no dispatch_deferred_to
+ *   T14: Flag ON + spawn rejects → SPAWN_FAILED exit + error trace
+ *   T15: Flag ON + awaitAndClassify throws RateLimitError → exit 4
  *
  * Framework: vitest (tests/ tree)
  * Real subprocess spawn: NEVER — IAgentRuntime is mocked throughout.
@@ -32,6 +36,11 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
 import { fileURLToPath } from 'node:url';
+import { Readable } from 'node:stream';
+import type {
+  IAgentRuntime,
+  RuntimeHandle,
+} from '../../packages/core/src/domain/types/runtime.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -594,8 +603,119 @@ describe('runSelfTask — TracingService reuse (T11)', () => {
   });
 });
 
+// T12–T15 helpers
+function makeMockReadable(data = 'mock-line\n'): Readable {
+  return Readable.from([Buffer.from(data, 'utf8')]);
+}
+
+function makeMockHandle(overrides: Partial<RuntimeHandle> = {}): RuntimeHandle {
+  return {
+    sessionId: 'mock-session-uuid',
+    pid: 99998,
+    abort: vi.fn(),
+    stdout: makeMockReadable(),
+    stderr: makeMockReadable(),
+    worktreePath: undefined,
+    ...overrides,
+  };
+}
+
+// T12–T15 — IAgentRuntime injection tests (Decision 040 §6 G3 Option D)
+describe('runSelfTask — IAgentRuntime injection (T12–T15)', () => {
+  let tmpDir: string;
+  let savedEnv: NodeJS.ProcessEnv;
+
+  beforeEach(() => {
+    tmpDir = makeTmpDir();
+    savedEnv = { ...process.env };
+    process.env['ORCH_DOGFOOD_PARENT_OK'] = '1';
+    delete process.env['ORCH_DOGFOOD_EXECUTE'];
+  });
+
+  afterEach(() => {
+    process.env = savedEnv;
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  function traceAbs(name: string): string {
+    return path.resolve(REPO_ROOT, `agent-workspace/traces/${name}`);
+  }
+
+  function makeEnv(traceName: string): string {
+    return writeEnvelope(tmpDir, validEnvelopeYaml({
+      dispatch_trace_path: `agent-workspace/traces/${traceName}`,
+      rollback_marker_path: path.join(tmpDir, '.no-marker').replace(/\\/g, '/'),
+    }));
+  }
+
+  it('T12: flag OFF (default) → stub trace, no IAgentRuntime.spawn call', async () => {
+    const mockRuntime: IAgentRuntime = {
+      spawn: vi.fn(), resume: vi.fn(), terminate: vi.fn(),
+      awaitAndClassify: vi.fn(), writeStdin: vi.fn(),
+    };
+    const exit = await runSelfTask(makeEnv('t12.jsonl'), mockRuntime);
+    expect(exit).toBe(EXIT_CODES.OK);
+    expect(mockRuntime.spawn).not.toHaveBeenCalled();
+    const trace = fs.readFileSync(traceAbs('t12.jsonl'), 'utf8');
+    expect(trace).toContain('"flag_off":true');
+    expect(trace).not.toContain('dispatch_deferred_to');
+    fs.unlinkSync(traceAbs('t12.jsonl'));
+  });
+
+  it('T13: flag ON + mock spawn resolves → real spawn record, no dispatch_deferred_to', async () => {
+    process.env['ORCH_DOGFOOD_EXECUTE'] = 'true';
+    const mockHandle = makeMockHandle({ pid: 99999, sessionId: 'mock-session-uuid' });
+    const mockRuntime: IAgentRuntime = {
+      spawn: vi.fn().mockResolvedValue(mockHandle),
+      awaitAndClassify: vi.fn().mockResolvedValue(undefined),
+      resume: vi.fn(), terminate: vi.fn(), writeStdin: vi.fn(),
+    };
+    const exit = await runSelfTask(makeEnv('t13.jsonl'), mockRuntime);
+    expect(exit).toBe(EXIT_CODES.OK);
+    expect(mockRuntime.spawn).toHaveBeenCalledTimes(1);
+    expect(mockRuntime.awaitAndClassify).toHaveBeenCalledWith(mockHandle);
+    const trace = fs.readFileSync(traceAbs('t13.jsonl'), 'utf8');
+    expect(trace).toContain('"pid":99999');
+    expect(trace).toContain('"session_id":"mock-session-uuid"');
+    expect(trace).toContain('"flag_off":false');
+    expect(trace).not.toContain('dispatch_deferred_to');
+    fs.unlinkSync(traceAbs('t13.jsonl'));
+  });
+
+  it('T14: flag ON + spawn rejects → SPAWN_FAILED exit + error trace', async () => {
+    process.env['ORCH_DOGFOOD_EXECUTE'] = 'true';
+    const { RuntimeSpawnError } = await import('../../packages/core/src/domain/errors.js');
+    const mockRuntime: IAgentRuntime = {
+      spawn: vi.fn().mockRejectedValue(new RuntimeSpawnError('ccs binary not found on PATH')),
+      awaitAndClassify: vi.fn(), resume: vi.fn(), terminate: vi.fn(), writeStdin: vi.fn(),
+    };
+    const exit = await runSelfTask(makeEnv('t14.jsonl'), mockRuntime);
+    expect(exit).toBe(EXIT_CODES.SPAWN_FAILED);
+    const trace = fs.readFileSync(traceAbs('t14.jsonl'), 'utf8');
+    expect(trace).toContain('ccs binary not found on PATH');
+    expect(trace).toMatch(/"status":"error"/);
+    fs.unlinkSync(traceAbs('t14.jsonl'));
+  });
+
+  it('T15: flag ON + awaitAndClassify throws RateLimitError → exit 4', async () => {
+    process.env['ORCH_DOGFOOD_EXECUTE'] = 'true';
+    const { RateLimitError } = await import('../../packages/core/src/domain/errors.js');
+    const mockRuntime: IAgentRuntime = {
+      spawn: vi.fn().mockResolvedValue(makeMockHandle({ pid: 11111 })),
+      awaitAndClassify: vi.fn().mockRejectedValue(new RateLimitError('rate limit hit (exit 1)')),
+      resume: vi.fn(), terminate: vi.fn(), writeStdin: vi.fn(),
+    };
+    const exit = await runSelfTask(makeEnv('t15.jsonl'), mockRuntime);
+    expect(exit).toBe(EXIT_CODES.SPAWN_FAILED);
+    expect(mockRuntime.spawn).toHaveBeenCalledTimes(1);
+    const trace = fs.readFileSync(traceAbs('t15.jsonl'), 'utf8');
+    expect(trace).toContain('rate limit hit');
+    fs.unlinkSync(traceAbs('t15.jsonl'));
+  });
+});
+
 describe('smoke fixture validation', () => {
-  it('_smoke-fixture.yaml parses with DogfoodEnvelopeSchema', () => {
+  it('_smoke-fixture.yaml parses with DogfoodEnvelopeSchema', async () => {
     const fixturePath = path.resolve(
       REPO_ROOT,
       'agent-workspace/queue/self-tasks/_smoke-fixture.yaml',

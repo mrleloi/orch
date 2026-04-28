@@ -2,7 +2,8 @@
  * ClaudeCodeAdapter — IAgentRuntime implementation using the `ccs` CLI subprocess.
  *
  * Invariants enforced:
- *  I-3: NO Agent SDK imports. CLI subprocess ONLY via `execa('ccs', ...)`.
+ *  I-3: NO Agent SDK imports. CLI subprocess ONLY via `execa('ccs', ...)` or
+ *       `execa('claude', ['--rc', ...])` when ORCH_RUNTIME_MODE=subscription.
  *  I-12: All errors caught at adapter boundary and wrapped in DomainError subclasses.
  *  I-14: No NestJS imports except `@nestjs/common` for Injectable/Logger.
  *
@@ -283,11 +284,21 @@ export class ClaudeCodeAdapter implements IAgentRuntime {
       workdir: effectiveCwd,
     });
 
+    // ORCH_RUNTIME_MODE=subscription bypasses ccs delegation and spawns `claude
+    // --rc` directly using the operator's existing subscription credentials at
+    // ~/.claude/. This is the single-account default for solo operators; ccs
+    // mode remains the multi-account path. See docs/configure.md §runtime-mode.
+    const subscriptionMode = process.env.ORCH_RUNTIME_MODE === 'subscription';
+    const spawnCmd = subscriptionMode ? 'claude' : 'ccs';
+    const spawnArgs = subscriptionMode
+      ? ['--rc', `orch-${profile || 'self'}`, '-p', effectivePrompt, '--output-format', 'stream-json']
+      : [profile, '-p', effectivePrompt, '--output-format', 'stream-json'];
+
     let child: ExecaChildProcess;
     try {
       child = execa(
-        'ccs',
-        [profile, '-p', effectivePrompt, '--output-format', 'stream-json'],
+        spawnCmd,
+        spawnArgs,
         {
           cwd: effectiveCwd,
           env: childEnv,
@@ -297,9 +308,9 @@ export class ClaudeCodeAdapter implements IAgentRuntime {
         },
       );
     } catch (err) {
-      // Synchronous throw (e.g. ENOENT when ccs is not on PATH)
+      // Synchronous throw (e.g. ENOENT when binary is not on PATH)
       throw new RuntimeSpawnError(
-        `Failed to spawn ccs for profile "${profile}": ${String(err)}`,
+        `Failed to spawn ${spawnCmd} for profile "${profile}": ${String(err)}`,
         { cause: err },
       );
     }

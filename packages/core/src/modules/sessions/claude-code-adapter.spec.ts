@@ -424,6 +424,84 @@ describe('ClaudeCodeAdapter', () => {
       expect(handle.sessionId).toBe(sessionId);
     });
 
+    // ── ORCH_RUNTIME_MODE: subscription-mode branch (SC-39 / Phase 12 patch) ───
+
+    it('ORCH_RUNTIME_MODE=subscription: invokes claude binary with --rc, -p, --output-format stream-json', async () => {
+      const prev = process.env.ORCH_RUNTIME_MODE;
+      try {
+        process.env.ORCH_RUNTIME_MODE = 'subscription';
+        const child = makeFakeChild({ exitCode: 0 });
+        mockExeca.mockReturnValue(child);
+
+        await adapter.spawn({
+          profile: 'myprofile',
+          prompt: 'do the thing',
+          workdir: '/some/path',
+        });
+
+        expect(mockExeca).toHaveBeenCalledWith(
+          'claude',
+          ['--rc', 'orch-myprofile', '-p', 'do the thing', '--output-format', 'stream-json'],
+          expect.objectContaining({ cwd: '/some/path', reject: false }),
+        );
+      } finally {
+        if (prev === undefined) {
+          delete process.env.ORCH_RUNTIME_MODE;
+        } else {
+          process.env.ORCH_RUNTIME_MODE = prev;
+        }
+      }
+    });
+
+    it('ORCH_RUNTIME_MODE unset (default): invokes ccs with [profile, -p, prompt, --output-format, stream-json]', async () => {
+      const prev = process.env.ORCH_RUNTIME_MODE;
+      try {
+        delete process.env.ORCH_RUNTIME_MODE;
+        const child = makeFakeChild({ exitCode: 0 });
+        mockExeca.mockReturnValue(child);
+
+        await adapter.spawn({
+          profile: 'myprofile',
+          prompt: 'do the thing',
+          workdir: '/some/path',
+        });
+
+        expect(mockExeca).toHaveBeenCalledWith(
+          'ccs',
+          ['myprofile', '-p', 'do the thing', '--output-format', 'stream-json'],
+          expect.objectContaining({ cwd: '/some/path', reject: false }),
+        );
+      } finally {
+        if (prev === undefined) {
+          delete process.env.ORCH_RUNTIME_MODE;
+        } else {
+          process.env.ORCH_RUNTIME_MODE = prev;
+        }
+      }
+    });
+
+    it('ORCH_RUNTIME_MODE=arbitrary-value: falls back to ccs (strict equality check)', async () => {
+      const prev = process.env.ORCH_RUNTIME_MODE;
+      try {
+        process.env.ORCH_RUNTIME_MODE = 'api';
+        const child = makeFakeChild({ exitCode: 0 });
+        mockExeca.mockReturnValue(child);
+
+        await adapter.spawn({ profile: 'p', prompt: 'q' });
+
+        const callArgs = mockExeca.mock.calls[0] as [string, string[]];
+        // Must call ccs, NOT claude
+        expect(callArgs[0]).toBe('ccs');
+        expect(callArgs[1]).not.toContain('--rc');
+      } finally {
+        if (prev === undefined) {
+          delete process.env.ORCH_RUNTIME_MODE;
+        } else {
+          process.env.ORCH_RUNTIME_MODE = prev;
+        }
+      }
+    });
+
     it('stdoutHandler receives each parsed event in order', async () => {
       const events = [
         { type: 'session_started', session_id: 'sid-aabbcc' },
