@@ -1,7 +1,7 @@
 ---
 name: context-restore
 description: Use at session start when resuming after a crash, compact, or split — restores context from the latest (or specified) checkpoint in agent-workspace/memory/checkpoints/.
-tools: [Read, Bash, Glob]
+allowed-tools: [Read, Bash, Glob]
 ---
 
 # /context-restore — Resume From Checkpoint

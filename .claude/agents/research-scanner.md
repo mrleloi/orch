@@ -2,7 +2,7 @@
 name: research-scanner
 description: Use when studying one reference repo to extract borrowable patterns. Invoked per target repo during Phase 0 research or when a new external dependency requires upfront study.
 model: sonnet
-tools: [Read, Glob, Grep, Bash, WebFetch]
+allowed-tools: [Read, Glob, Grep, Bash, WebFetch]
 archetype: agent
 test: none
 ---

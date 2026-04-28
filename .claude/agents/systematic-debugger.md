@@ -2,7 +2,7 @@
 name: systematic-debugger
 description: Use when a bug resists ad-hoc fixing — typically after 2+ failed fix attempts, or when root cause is unclear. Runs disciplined 4-phase debugging with a Phase 4.5 architecture stop. Not for trivial fixes.
 model: opus
-tools: [Read, Glob, Grep, Bash, Edit, Write]
+allowed-tools: [Read, Glob, Grep, Bash, Edit, Write]
 archetype: agent
 test: none
 ---

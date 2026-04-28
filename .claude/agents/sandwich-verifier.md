@@ -2,7 +2,7 @@
 name: sandwich-verifier
 description: Use when a completed dev session needs adversarial whole-session review. Fresh context required — must not have written the code under review. Produces a verification report with verdict PASS / PASS_WITH_CONCERNS / FAIL.
 model: opus
-tools: [Read, Glob, Grep, Bash]
+allowed-tools: [Read, Glob, Grep, Bash, Write]
 archetype: agent
 test: none
 ---
@@ -86,9 +86,13 @@ For each test added:
 - P3 violated? Unrelated changes?
 - P4 violated? Unclear success criteria?
 
-### Phase 7: Write Verification Report
+### Phase 7: Write Verification Report (MANDATORY — DO NOT return inline-only)
 
-`agent-workspace/quality-reports/verification-YYYY-MM-DD-<task>.md`:
+You MUST invoke the `Write` tool to persist the verdict at the canonical path:
+
+`agent-workspace/memory/observations/task-<id>-<YYYYMMDD>-sandwich-verifier.md`
+
+(Legacy quality-reports path is deprecated. Inline-only return = audit-trail violation per CF-V2.6-AUDIT-TRAIL-INLINE-RETURN-PATTERN.) Report shape:
 
 ```markdown
 # Verification Report — Task <N.M>

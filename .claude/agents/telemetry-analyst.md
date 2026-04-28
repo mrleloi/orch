@@ -2,7 +2,7 @@
 name: telemetry-analyst
 description: Use when a phase boundary is reached and a `component-rollup-phase-<N>.md` file exists. Reads telemetry rollup + master-planner routing rules; emits phase-<N>-routing-recommendations.md proposing model bumps, agent prunes, and parallelization-gate adjustments. Each proposal MUST cite >=1 rollup row.
 model: sonnet
-tools: [Read, Glob, Grep, Write]
+allowed-tools: [Read, Glob, Grep, Write]
 archetype: agent
 ---
 

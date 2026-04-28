@@ -74,14 +74,7 @@ Orchestrator parses this to decide the next hop.
 
 ## Large-output verifier protocol
 
-When a spawned session is forbidden (by system-reminder or CLAUDE.md) from writing summary/findings/analysis `.md` files, the session MUST return findings **inline in the final assistant message** — not by writing a separate file. The completion YAML block still appears at the end of that same message.
-
-Pattern:
-1. Write your findings/analysis as prose text in the assistant message body.
-2. Immediately follow with the YAML completion block (no prose after the `---` close).
-3. Do NOT create `findings.md`, `analysis.md`, `summary.md`, or equivalent files to work around the restriction — inline prose IS the output.
-
-This rule applies whenever the system-reminder contains "Do NOT Write report/summary/findings/analysis .md files" (current CLAUDE.md guidance for subagent invocations).
+When a spawned session is forbidden (by system-reminder or CLAUDE.md) from writing summary/findings/analysis `.md` files, return findings **inline in the final assistant message** followed by the YAML completion block. Do NOT create `findings.md`/`analysis.md`/`summary.md` to bypass the restriction — inline prose IS the output.
 
 ## Forbidden Tools (when ORCH_SPAWNED=true)
 
@@ -129,6 +122,16 @@ The following are **NEVER** permitted in a spawned session. Violations block the
 ## How commands and subagents declare spawned-awareness
 
 Every agent and command file should include a `## Spawned Session Handling` section near the end with explicit divergence rules. If missing → add it before using the agent in orchestrated flows.
+
+## Settings.json edits don't take effect until next session boot
+
+Claude Code reads `.claude/settings.json` exactly once at session start. The hook chain is loaded into memory and remains fixed for the session lifetime. Mid-session edits are silently inert until the next session boots.
+
+A spawned session editing `settings.json` cannot measure its own fix — current-session telemetry reflects the pre-fix chain. This is the root cause behind Decision 034's dispatch-pairing-rate SKIP persisting into Phase 11 despite v2.5 landing the wiring (see `decisions/035-sc39-retry-verdict-v2.5.md` §3.1, §5 R-1).
+
+Regression detector: `scripts/audit/settings-version-check.sh` (Decision 035 §6 deliverable). `--init` at SessionStart captures baseline; later runs detect mid-session drift.
+
+**Action item**: if your task envelope edits `.claude/settings.json`, set `requires_session_restart: true` in your completion YAML so the orchestrator chains a restart.
 
 ## Detecting spawned mode programmatically
 

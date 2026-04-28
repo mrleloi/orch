@@ -1,7 +1,7 @@
 ---
 name: phase-advance
 description: Use to validate current phase completion criteria and advance to the next phase. Invoked automatically at end of each phase in autonomous mode.
-tools: [Read, Write, Bash]
+allowed-tools: [Read, Write, Bash]
 ---
 
 # /phase-advance — Move to Next Phase

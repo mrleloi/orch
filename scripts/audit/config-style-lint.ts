@@ -342,20 +342,19 @@ export const ALL_RULES: LintRule[] = [
   {
     id: 'LR-02',
     severity: 'ERROR',
-    description: 'frontmatter contains `allowed-tools` key (forbidden) OR `tools` is missing/empty',
+    description: 'frontmatter contains legacy `tools` key (forbidden post-Claude-Code-5.2.7) OR `allowed-tools` is missing/empty',
     appliesTo: ['agent', 'skill-discipline', 'skill-reference', 'command'],
     check(file) {
       const violations: Violation[] = [];
-      if (hasField(file.frontmatter, 'allowed-tools')) {
-        violations.push(makeError('LR-02', 1, 'LR-02: Forbidden key `allowed-tools` in frontmatter; rename to `tools`'));
+      if (hasField(file.frontmatter, 'tools')) {
+        violations.push(makeError('LR-02', 1, 'LR-02: Forbidden legacy key `tools` in frontmatter; rename to `allowed-tools` (Claude Code 5.2.7+ contract)'));
       }
-      const tools = getField(file.frontmatter, 'tools');
-      if (file.frontmatter !== null && !hasField(file.frontmatter, 'allowed-tools')) {
-        // Only require tools if allowed-tools is also absent
-        if (tools === undefined || tools === null) {
-          violations.push(makeError('LR-02', 1, 'LR-02: `tools` field missing or empty'));
-        } else if (!Array.isArray(tools) || tools.length === 0) {
-          violations.push(makeError('LR-02', 1, 'LR-02: `tools` must be a non-empty array'));
+      const allowed = getField(file.frontmatter, 'allowed-tools');
+      if (file.frontmatter !== null && !hasField(file.frontmatter, 'tools')) {
+        if (allowed === undefined || allowed === null) {
+          violations.push(makeError('LR-02', 1, 'LR-02: `allowed-tools` field missing or empty'));
+        } else if (!Array.isArray(allowed) || allowed.length === 0) {
+          violations.push(makeError('LR-02', 1, 'LR-02: `allowed-tools` must be a non-empty array'));
         }
       }
       return violations;
@@ -571,7 +570,7 @@ export const ALL_RULES: LintRule[] = [
     appliesTo: ['test-fixture'],
     check(file) {
       const violations: Violation[] = [];
-      const required = ['Trigger', 'Expected Behavior', 'Failure Modes', 'Metrics', 'Assertions'];
+      const required = ['Trigger', 'Expected behavior (PASS)', 'Named failure modes', 'Metrics', 'Assertions'];
       const headings = new Set(file.sections.map(s => s.heading));
       for (const req of required) {
         if (!headings.has(req)) {

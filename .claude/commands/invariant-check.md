@@ -1,7 +1,7 @@
 ---
 name: invariant-check
 description: Use to run all grep-based invariant checks from constitution/invariants.md before claiming any IMPL task done. Auto-runs during session-end.
-tools: [Read, Bash, Grep]
+allowed-tools: [Read, Bash, Grep]
 ---
 
 # /invariant-check — Run All Invariant Greps

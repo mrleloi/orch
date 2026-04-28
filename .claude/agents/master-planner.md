@@ -2,7 +2,7 @@
 name: master-planner
 description: Use when a phase-level goal must be decomposed into a budget-aware sequence of sessions, or when a new feature enters mid-phase and the existing phase plan no longer fits.
 model: opus
-tools: [Read, Glob, Grep, Write]
+allowed-tools: [Read, Glob, Grep, Write]
 archetype: agent
 test: none
 ---

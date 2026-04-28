@@ -2,7 +2,7 @@
 name: sandwich-architect
 description: Use when a phase-plan task must be expanded into a file-level, signature-level session plan with per-subtask verification criteria. Runs before sandwich-dev or task-implementer.
 model: opus
-tools: [Read, Glob, Grep, Write]
+allowed-tools: [Read, Glob, Grep, Write]
 archetype: agent
 test: none
 ---

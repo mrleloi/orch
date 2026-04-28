@@ -2,7 +2,7 @@
 name: task-implementer
 description: Use when executing ONE task from a session plan in an isolated fresh-context subagent. Scope is a single task, not a whole session. Pair with spec-compliance-reviewer and code-quality-reviewer for per-task two-stage review.
 model: sonnet
-tools: [Read, Write, Edit, Glob, Grep, Bash]
+allowed-tools: [Read, Write, Edit, Glob, Grep, Bash]
 archetype: agent
 test: none
 ---

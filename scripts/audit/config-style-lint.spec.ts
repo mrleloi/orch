@@ -143,14 +143,14 @@ describe('parseSections', () => {
 
 describe('LR-01: model field', () => {
   it('PASS — valid model value opus on agent', () => {
-    const raw = `---\nname: test-agent\ndescription: Use when testing.\nmodel: opus\ntools: [Read]\n---\n## Persona\nTest.`;
+    const raw = `---\nname: test-agent\ndescription: Use when testing.\nmodel: opus\nallowed-tools: [Read]\n---\n## Persona\nTest.`;
     const file = buildParsedFile(raw, 'agent', '.claude/agents/test-agent.md');
     const vs = runRule('LR-01', file);
     expect(vs).toHaveLength(0);
   });
 
   it('FAIL — missing model field on agent', () => {
-    const raw = `---\nname: test-agent\ndescription: Use when testing.\ntools: [Read]\n---\n## Persona\nTest.`;
+    const raw = `---\nname: test-agent\ndescription: Use when testing.\nallowed-tools: [Read]\n---\n## Persona\nTest.`;
     const file = buildParsedFile(raw, 'agent', '.claude/agents/test-agent.md');
     const vs = runRule('LR-01', file);
     expect(ruleIds(vs)).toContain('LR-01');
@@ -158,14 +158,14 @@ describe('LR-01: model field', () => {
   });
 
   it('FAIL — invalid model value on discipline-skill', () => {
-    const raw = `---\nname: test-skill\ndescription: Use when testing.\nmodel: gpt-4\ntools: [Read]\narchetype: discipline\n---\n## When to invoke\nTest.`;
+    const raw = `---\nname: test-skill\ndescription: Use when testing.\nmodel: gpt-4\nallowed-tools: [Read]\narchetype: discipline\n---\n## When to invoke\nTest.`;
     const file = buildParsedFile(raw, 'skill-discipline', '.claude/skills/test-skill/SKILL.md');
     const vs = runRule('LR-01', file);
     expect(ruleIds(vs)).toContain('LR-01');
   });
 
   it('PASS — LR-01 does not apply to reference-skill (model optional)', () => {
-    const raw = `---\nname: test-ref\ndescription: Use when testing.\ntools: [Read]\narchetype: reference\n---\n## When to use\nTest.`;
+    const raw = `---\nname: test-ref\ndescription: Use when testing.\nallowed-tools: [Read]\narchetype: reference\n---\n## When to use\nTest.`;
     const file = buildParsedFile(raw, 'skill-reference', '.claude/skills/test-ref/SKILL.md');
     const vs = runRule('LR-01', file);
     // LR-01 only applies to agent + skill-discipline; reference skill should not trigger it
@@ -177,23 +177,23 @@ describe('LR-01: model field', () => {
 // §4 LR-02 — tools field validation
 // ---------------------------------------------------------------------------
 
-describe('LR-02: tools field', () => {
-  it('FAIL — forbidden allowed-tools key on agent', () => {
-    const raw = `---\nname: bad-agent\ndescription: Use when testing.\nmodel: opus\nallowed-tools: [Read]\n---\n## Persona\nTest.`;
+describe('LR-02: allowed-tools field', () => {
+  it('FAIL — forbidden legacy tools key on agent', () => {
+    const raw = `---\nname: bad-agent\ndescription: Use when testing.\nmodel: opus\ntools: [Read]\n---\n## Persona\nTest.`;
     const file = buildParsedFile(raw, 'agent', '.claude/agents/bad-agent.md');
     const vs = runRule('LR-02', file);
     expect(ruleIds(vs)).toContain('LR-02');
   });
 
-  it('FAIL — tools missing on command', () => {
+  it('FAIL — allowed-tools missing on command', () => {
     const raw = `---\nname: my-cmd\ndescription: Use when testing.\n---\n## Purpose\nTest.`;
     const file = buildParsedFile(raw, 'command', '.claude/commands/my-cmd.md');
     const vs = runRule('LR-02', file);
     expect(ruleIds(vs)).toContain('LR-02');
   });
 
-  it('PASS — tools present as array', () => {
-    const raw = `---\nname: ok-agent\ndescription: Use when testing.\nmodel: opus\ntools: [Read, Write]\n---\n## Persona\nOK.`;
+  it('PASS — allowed-tools present as array', () => {
+    const raw = `---\nname: ok-agent\ndescription: Use when testing.\nmodel: opus\nallowed-tools: [Read, Write]\n---\n## Persona\nOK.`;
     const file = buildParsedFile(raw, 'agent', '.claude/agents/ok-agent.md');
     const vs = runRule('LR-02', file);
     expect(vs).toHaveLength(0);
@@ -213,14 +213,14 @@ describe('LR-03: command frontmatter', () => {
   });
 
   it('FAIL — command frontmatter missing name field', () => {
-    const raw = `---\ndescription: Use when testing.\ntools: [Read]\n---\n## Purpose\nTest.`;
+    const raw = `---\ndescription: Use when testing.\nallowed-tools: [Read]\n---\n## Purpose\nTest.`;
     const file = buildParsedFile(raw, 'command', '.claude/commands/my-command.md');
     const vs = runRule('LR-03', file);
     expect(ruleIds(vs)).toContain('LR-03');
   });
 
   it('PASS — command with complete frontmatter', () => {
-    const raw = `---\nname: my-command\ndescription: Use when testing.\ntools: [Read, Write]\n---\n## Purpose\nTest.\n\n## Steps\n### 1. Do it\n`;
+    const raw = `---\nname: my-command\ndescription: Use when testing.\nallowed-tools: [Read, Write]\n---\n## Purpose\nTest.\n\n## Steps\n### 1. Do it\n`;
     const file = buildParsedFile(raw, 'command', '.claude/commands/my-command.md');
     const vs = runRule('LR-03', file);
     expect(vs).toHaveLength(0);
@@ -251,7 +251,7 @@ describe('LR-04: LOC hard ceiling', () => {
 
   it('FAIL — agent over 200 LOC hard ceiling', () => {
     const bodyLines = Array.from({ length: 205 }, (_, i) => `line ${i}`).join('\n');
-    const raw = `---\nname: big-agent\ndescription: Use when big.\nmodel: opus\ntools: [Read]\n---\n${bodyLines}`;
+    const raw = `---\nname: big-agent\ndescription: Use when big.\nmodel: opus\nallowed-tools: [Read]\n---\n${bodyLines}`;
     const file = buildParsedFile(raw, 'agent', '.claude/agents/big-agent.md');
     const vs = runRule('LR-04', file);
     expect(ruleIds(vs)).toContain('LR-04');
@@ -264,14 +264,14 @@ describe('LR-04: LOC hard ceiling', () => {
 
 describe('LR-06: nothing after terminal spawned section', () => {
   it('FAIL — H2 after Spawned Session Handling on agent', () => {
-    const raw = `---\nname: bad-agent\ndescription: Use when testing.\nmodel: opus\ntools: [Read]\n---\n## Persona\nTest.\n\n## Process\nDo work.\n\n## Spawned Session Handling\nYAML block.\n\n## Mandates A/B/C\n### Mandate A\nStuff.\n### Mandate B\nStuff.\n### Mandate C\nStuff.`;
+    const raw = `---\nname: bad-agent\ndescription: Use when testing.\nmodel: opus\nallowed-tools: [Read]\n---\n## Persona\nTest.\n\n## Process\nDo work.\n\n## Spawned Session Handling\nYAML block.\n\n## Mandates A/B/C\n### Mandate A\nStuff.\n### Mandate B\nStuff.\n### Mandate C\nStuff.`;
     const file = buildParsedFile(raw, 'agent', '.claude/agents/bad-agent.md');
     const vs = runRule('LR-06', file);
     expect(ruleIds(vs)).toContain('LR-06');
   });
 
   it('PASS — no sections after spawned', () => {
-    const raw = `---\nname: ok-agent\ndescription: Use when testing.\nmodel: opus\ntools: [Read]\n---\n## Persona\nTest.\n\n## Process\nDo work.\n\n## Spawned Session Handling\nYAML block.`;
+    const raw = `---\nname: ok-agent\ndescription: Use when testing.\nmodel: opus\nallowed-tools: [Read]\n---\n## Persona\nTest.\n\n## Process\nDo work.\n\n## Spawned Session Handling\nYAML block.`;
     const file = buildParsedFile(raw, 'agent', '.claude/agents/ok-agent.md');
     const vs = runRule('LR-06', file);
     expect(vs).toHaveLength(0);
@@ -284,14 +284,14 @@ describe('LR-06: nothing after terminal spawned section', () => {
 
 describe('LR-09: body model contradiction', () => {
   it('FAIL — body says "Why opus" but frontmatter says sonnet', () => {
-    const raw = `---\nname: telemetry-analyst\ndescription: Use when analyzing.\nmodel: sonnet\ntools: [Read]\n---\n## Persona\nWhy opus: because it needs deep reasoning.\n\n## Process\nDo work.`;
+    const raw = `---\nname: telemetry-analyst\ndescription: Use when analyzing.\nmodel: sonnet\nallowed-tools: [Read]\n---\n## Persona\nWhy opus: because it needs deep reasoning.\n\n## Process\nDo work.`;
     const file = buildParsedFile(raw, 'agent', '.claude/agents/telemetry-analyst.md');
     const vs = runRule('LR-09', file);
     expect(ruleIds(vs)).toContain('LR-09');
   });
 
   it('PASS — body says "Why opus" and frontmatter also says opus', () => {
-    const raw = `---\nname: planner\ndescription: Use when planning.\nmodel: opus\ntools: [Read]\n---\n## Persona\nWhy opus: needs judgment.\n\n## Process\nDo work.`;
+    const raw = `---\nname: planner\ndescription: Use when planning.\nmodel: opus\nallowed-tools: [Read]\n---\n## Persona\nWhy opus: needs judgment.\n\n## Process\nDo work.`;
     const file = buildParsedFile(raw, 'agent', '.claude/agents/planner.md');
     const vs = runRule('LR-09', file);
     expect(vs).toHaveLength(0);
@@ -304,14 +304,14 @@ describe('LR-09: body model contradiction', () => {
 
 describe('LR-13: archetype missing on skill', () => {
   it('FAIL — skill has no archetype field', () => {
-    const raw = `---\nname: test-skill\ndescription: Use when testing.\ntools: [Read]\nmodel: opus\n---\n## When to invoke\nTest.`;
+    const raw = `---\nname: test-skill\ndescription: Use when testing.\nallowed-tools: [Read]\nmodel: opus\n---\n## When to invoke\nTest.`;
     const file = buildParsedFile(raw, 'skill-discipline', '.claude/skills/test-skill/SKILL.md');
     const vs = runRule('LR-13', file);
     expect(ruleIds(vs)).toContain('LR-13');
   });
 
   it('PASS — skill has archetype: discipline', () => {
-    const raw = `---\nname: test-skill\ndescription: Use when testing.\ntools: [Read]\narchetype: discipline\nmodel: opus\n---\n## When to invoke\nTest.`;
+    const raw = `---\nname: test-skill\ndescription: Use when testing.\nallowed-tools: [Read]\narchetype: discipline\nmodel: opus\n---\n## When to invoke\nTest.`;
     const file = buildParsedFile(raw, 'skill-discipline', '.claude/skills/test-skill/SKILL.md');
     const vs = runRule('LR-13', file);
     expect(vs).toHaveLength(0);
@@ -351,7 +351,7 @@ describe('LR-15: hook-profile profile field', () => {
 
 describe('LR-19: test-fixture required sections', () => {
   it('FAIL — test fixture missing Metrics and Assertions sections', () => {
-    const raw = `## Trigger\nWhen X.\n\n## Expected Behavior\nDoes Y.\n\n## Failure Modes\nMODE-1: fails.`;
+    const raw = `## Trigger\nWhen X.\n\n## Expected behavior (PASS)\nDoes Y.\n\n## Named failure modes\nMODE-1: fails.`;
     const file = buildParsedFile(raw, 'test-fixture', '.claude/agents/test.test.md');
     const vs = runRule('LR-19', file);
     expect(ruleIds(vs)).toContain('LR-19');
@@ -359,7 +359,7 @@ describe('LR-19: test-fixture required sections', () => {
   });
 
   it('PASS — test fixture has all 5 required sections', () => {
-    const raw = `## Trigger\nWhen X.\n\n## Expected Behavior\nDoes Y.\n\n## Failure Modes\nMODE-1: fails.\n\n## Metrics\nCount: 1.\n\n## Assertions\n1. Check X.`;
+    const raw = `## Trigger\nWhen X.\n\n## Expected behavior (PASS)\nDoes Y.\n\n## Named failure modes\nMODE-1: fails.\n\n## Metrics\nCount: 1.\n\n## Assertions\n1. Check X.`;
     const file = buildParsedFile(raw, 'test-fixture', '.claude/agents/test.test.md');
     const vs = runRule('LR-19', file);
     expect(vs).toHaveLength(0);
@@ -373,21 +373,21 @@ describe('LR-19: test-fixture required sections', () => {
 describe('LR-12: description validation', () => {
   it('WARN — description >300 chars', () => {
     const longDesc = 'Use when ' + 'x'.repeat(295);
-    const raw = `---\nname: test\ndescription: "${longDesc}"\nmodel: opus\ntools: [Read]\n---\n## Persona\nTest.`;
+    const raw = `---\nname: test\ndescription: "${longDesc}"\nmodel: opus\nallowed-tools: [Read]\n---\n## Persona\nTest.`;
     const file = buildParsedFile(raw, 'agent', '.claude/agents/test.md');
     const vs = runRule('LR-12', file);
     expect(vs.some(v => v.ruleId === 'LR-12' && v.severity === 'WARN')).toBe(true);
   });
 
   it('WARN — description does not start with imperative verb', () => {
-    const raw = `---\nname: test\ndescription: "This is a test agent that does things."\nmodel: opus\ntools: [Read]\n---\n## Persona\nTest.`;
+    const raw = `---\nname: test\ndescription: "This is a test agent that does things."\nmodel: opus\nallowed-tools: [Read]\n---\n## Persona\nTest.`;
     const file = buildParsedFile(raw, 'agent', '.claude/agents/test.md');
     const vs = runRule('LR-12', file);
     expect(vs.some(v => v.ruleId === 'LR-12' && v.severity === 'WARN')).toBe(true);
   });
 
   it('PASS — description starts with "Use when"', () => {
-    const raw = `---\nname: test\ndescription: "Use when you need to test things."\nmodel: opus\ntools: [Read]\n---\n## Persona\nTest.`;
+    const raw = `---\nname: test\ndescription: "Use when you need to test things."\nmodel: opus\nallowed-tools: [Read]\n---\n## Persona\nTest.`;
     const file = buildParsedFile(raw, 'agent', '.claude/agents/test.md');
     const vs = runRule('LR-12', file);
     expect(vs.filter(v => v.ruleId === 'LR-12')).toHaveLength(0);
@@ -400,14 +400,14 @@ describe('LR-12: description validation', () => {
 
 describe('LR-21: frontmatter key casing', () => {
   it('WARN — camelCase key in frontmatter', () => {
-    const raw = `---\nname: test\ndescription: Use when testing.\nmodel: opus\ntools: [Read]\narchetypeName: agent\n---\n## Persona\nTest.`;
+    const raw = `---\nname: test\ndescription: Use when testing.\nmodel: opus\nallowed-tools: [Read]\narchetypeName: agent\n---\n## Persona\nTest.`;
     const file = buildParsedFile(raw, 'agent', '.claude/agents/test.md');
     const vs = runRule('LR-21', file);
     expect(vs.some(v => v.ruleId === 'LR-21')).toBe(true);
   });
 
   it('WARN — snake_case key in frontmatter', () => {
-    const raw = `---\nname: test\ndescription: Use when testing.\nmodel: opus\ntools: [Read]\nsome_key: value\n---\n## Persona\nTest.`;
+    const raw = `---\nname: test\ndescription: Use when testing.\nmodel: opus\nallowed-tools: [Read]\nsome_key: value\n---\n## Persona\nTest.`;
     const file = buildParsedFile(raw, 'agent', '.claude/agents/test.md');
     const vs = runRule('LR-21', file);
     expect(vs.some(v => v.ruleId === 'LR-21')).toBe(true);
@@ -420,7 +420,7 @@ describe('LR-21: frontmatter key casing', () => {
 
 describe('LR-30: Mandates bolt-on detection', () => {
   it('FAIL — ## Mandates section with 3+ sub-mandates', () => {
-    const raw = `---\nname: bad-agent\ndescription: Use when testing.\nmodel: opus\ntools: [Read]\n---\n## Process\nDo work.\n\n## Spawned Session Handling\nYAML.\n\n## Mandates A/B/C/D\n### Mandate A\nStuff.\n### Mandate B\nStuff.\n### Mandate C\nStuff.`;
+    const raw = `---\nname: bad-agent\ndescription: Use when testing.\nmodel: opus\nallowed-tools: [Read]\n---\n## Process\nDo work.\n\n## Spawned Session Handling\nYAML.\n\n## Mandates A/B/C/D\n### Mandate A\nStuff.\n### Mandate B\nStuff.\n### Mandate C\nStuff.`;
     const file = buildParsedFile(raw, 'agent', '.claude/agents/bad-agent.md');
     // LR-30 checks Mandates sections with ≥3 H3s; LR-06 catches the after-spawned position
     const vs30 = runRule('LR-30', file);
@@ -428,7 +428,7 @@ describe('LR-30: Mandates bolt-on detection', () => {
   });
 
   it('PASS — Mandates section with only 2 sub-mandates', () => {
-    const raw = `---\nname: ok-agent\ndescription: Use when testing.\nmodel: opus\ntools: [Read]\n---\n## Process\nDo work.\n\n## Mandates\n### Mandate A\nStuff.\n### Mandate B\nStuff.\n\n## Spawned Session Handling\nYAML.`;
+    const raw = `---\nname: ok-agent\ndescription: Use when testing.\nmodel: opus\nallowed-tools: [Read]\n---\n## Process\nDo work.\n\n## Mandates\n### Mandate A\nStuff.\n### Mandate B\nStuff.\n\n## Spawned Session Handling\nYAML.`;
     const file = buildParsedFile(raw, 'agent', '.claude/agents/ok-agent.md');
     const vs = runRule('LR-30', file);
     expect(vs).toHaveLength(0);
@@ -483,7 +483,7 @@ describe('lintAll: integration over temp fixtures', () => {
         'name: conformant-agent',
         'description: Use when you need a clean test.',
         'model: opus',
-        'tools: [Read, Write]',
+        'allowed-tools: [Read, Write]',
         'archetype: agent',
         '---',
         '',
@@ -531,7 +531,7 @@ describe('lintAll: integration over temp fixtures', () => {
         '---',
         'name: bad-agent',
         'description: Use when testing.',
-        'tools: [Read]',
+        'allowed-tools: [Read]',
         '---',
         '',
         '## Persona',
@@ -558,7 +558,7 @@ describe('lintAll: integration over temp fixtures', () => {
         'name: no-archetype-agent',
         'description: Use when testing.',
         'model: opus',
-        'tools: [Read]',
+        'allowed-tools: [Read]',
         '---',
         '',
         '## Persona',
@@ -605,14 +605,14 @@ describe('lintAll: integration over temp fixtures', () => {
 
 describe('LR-11: invalid archetype value', () => {
   it('FAIL — archetype: agent on a skill file', () => {
-    const raw = `---\nname: bad-skill\ndescription: Use when testing.\ntools: [Read]\narchetype: agent\n---\n## When to invoke\nTest.`;
+    const raw = `---\nname: bad-skill\ndescription: Use when testing.\nallowed-tools: [Read]\narchetype: agent\n---\n## When to invoke\nTest.`;
     const file = buildParsedFile(raw, 'skill-discipline', '.claude/skills/bad-skill/SKILL.md');
     const vs = runRule('LR-11', file);
     expect(ruleIds(vs)).toContain('LR-11');
   });
 
   it('PASS — archetype: discipline', () => {
-    const raw = `---\nname: ok-skill\ndescription: Use when testing.\ntools: [Read]\narchetype: discipline\nmodel: opus\n---\n## When to invoke\nTest.`;
+    const raw = `---\nname: ok-skill\ndescription: Use when testing.\nallowed-tools: [Read]\narchetype: discipline\nmodel: opus\n---\n## When to invoke\nTest.`;
     const file = buildParsedFile(raw, 'skill-discipline', '.claude/skills/ok-skill/SKILL.md');
     const vs = runRule('LR-11', file);
     expect(vs).toHaveLength(0);
@@ -625,21 +625,21 @@ describe('LR-11: invalid archetype value', () => {
 
 describe('LR-07: filename kebab-case', () => {
   it('FAIL — camelCase filename', () => {
-    const raw = `---\nname: test\ndescription: Use when testing.\nmodel: opus\ntools: [Read]\n---\n## Persona\nTest.`;
+    const raw = `---\nname: test\ndescription: Use when testing.\nmodel: opus\nallowed-tools: [Read]\n---\n## Persona\nTest.`;
     const file = buildParsedFile(raw, 'agent', '.claude/agents/myAgent.md');
     const vs = runRule('LR-07', file);
     expect(ruleIds(vs)).toContain('LR-07');
   });
 
   it('PASS — kebab-case filename', () => {
-    const raw = `---\nname: my-agent\ndescription: Use when testing.\nmodel: opus\ntools: [Read]\n---\n## Persona\nTest.`;
+    const raw = `---\nname: my-agent\ndescription: Use when testing.\nmodel: opus\nallowed-tools: [Read]\n---\n## Persona\nTest.`;
     const file = buildParsedFile(raw, 'agent', '.claude/agents/my-agent.md');
     const vs = runRule('LR-07', file);
     expect(vs).toHaveLength(0);
   });
 
   it('PASS — SKILL.md is exempt from kebab-case check', () => {
-    const raw = `---\nname: test-skill\ndescription: Use when testing.\ntools: [Read]\narchetype: discipline\nmodel: opus\n---\n## When to invoke\nTest.`;
+    const raw = `---\nname: test-skill\ndescription: Use when testing.\nallowed-tools: [Read]\narchetype: discipline\nmodel: opus\n---\n## When to invoke\nTest.`;
     const file = buildParsedFile(raw, 'skill-discipline', '.claude/skills/test-skill/SKILL.md');
     const vs = runRule('LR-07', file);
     expect(vs).toHaveLength(0);
@@ -652,14 +652,14 @@ describe('LR-07: filename kebab-case', () => {
 
 describe('LR-17: reference-skill should not have discipline sections', () => {
   it('WARN — reference-skill with ## Red Flags', () => {
-    const raw = `---\nname: grammy-bot\ndescription: Use when creating Grammy bots.\ntools: [Read]\narchetype: reference\n---\n## When to use\nTest.\n\n## Reference Index\nTable.\n\n## Quick Reference\nCode.\n\n## Anti-Patterns\nDon't.\n\n## Red Flags — STOP\nStop here.`;
+    const raw = `---\nname: grammy-bot\ndescription: Use when creating Grammy bots.\nallowed-tools: [Read]\narchetype: reference\n---\n## When to use\nTest.\n\n## Reference Index\nTable.\n\n## Quick Reference\nCode.\n\n## Anti-Patterns\nDon't.\n\n## Red Flags — STOP\nStop here.`;
     const file = buildParsedFile(raw, 'skill-reference', '.claude/skills/grammy-bot/SKILL.md');
     const vs = runRule('LR-17', file);
     expect(vs.some(v => v.ruleId === 'LR-17')).toBe(true);
   });
 
   it('PASS — reference-skill without discipline sections', () => {
-    const raw = `---\nname: grammy-bot\ndescription: Use when creating Grammy bots.\ntools: [Read]\narchetype: reference\n---\n## When to use\nTest.\n\n## Reference Index\nTable.\n\n## Quick Reference\nCode.\n\n## Anti-Patterns\nDon't.`;
+    const raw = `---\nname: grammy-bot\ndescription: Use when creating Grammy bots.\nallowed-tools: [Read]\narchetype: reference\n---\n## When to use\nTest.\n\n## Reference Index\nTable.\n\n## Quick Reference\nCode.\n\n## Anti-Patterns\nDon't.`;
     const file = buildParsedFile(raw, 'skill-reference', '.claude/skills/grammy-bot/SKILL.md');
     const vs = runRule('LR-17', file);
     expect(vs.filter(v => v.ruleId === 'LR-17')).toHaveLength(0);
@@ -672,14 +672,14 @@ describe('LR-17: reference-skill should not have discipline sections', () => {
 
 describe('LR-18: command autonomous-mode variant header', () => {
   it('WARN — command uses ## Autonomous Mode variant', () => {
-    const raw = `---\nname: my-cmd\ndescription: Use when doing.\ntools: [Read]\n---\n## Purpose\nTest.\n\n## Steps\n### 1. Do it\n\n## Autonomous Mode\nHandle autonomously.`;
+    const raw = `---\nname: my-cmd\ndescription: Use when doing.\nallowed-tools: [Read]\n---\n## Purpose\nTest.\n\n## Steps\n### 1. Do it\n\n## Autonomous Mode\nHandle autonomously.`;
     const file = buildParsedFile(raw, 'command', '.claude/commands/my-cmd.md');
     const vs = runRule('LR-18', file);
     expect(vs.some(v => v.ruleId === 'LR-18')).toBe(true);
   });
 
   it('PASS — command uses canonical ## Spawned Session Handling', () => {
-    const raw = `---\nname: my-cmd\ndescription: Use when doing.\ntools: [Read]\n---\n## Purpose\nTest.\n\n## Steps\n### 1. Do it\n\n## Spawned Session Handling\n---\nstatus: DONE`;
+    const raw = `---\nname: my-cmd\ndescription: Use when doing.\nallowed-tools: [Read]\n---\n## Purpose\nTest.\n\n## Steps\n### 1. Do it\n\n## Spawned Session Handling\n---\nstatus: DONE`;
     const file = buildParsedFile(raw, 'command', '.claude/commands/my-cmd.md');
     const vs = runRule('LR-18', file);
     expect(vs.filter(v => v.ruleId === 'LR-18')).toHaveLength(0);
@@ -693,7 +693,7 @@ describe('LR-18: command autonomous-mode variant header', () => {
 describe('LR-20: LOC soft target warning', () => {
   it('WARN — command between 90 (soft) and 120 (hard) LOC', () => {
     const bodyLines = Array.from({ length: 95 }, (_, i) => `line ${i}`).join('\n');
-    const raw = `---\nname: my-cmd\ndescription: Use when doing.\ntools: [Read]\n---\n${bodyLines}`;
+    const raw = `---\nname: my-cmd\ndescription: Use when doing.\nallowed-tools: [Read]\n---\n${bodyLines}`;
     const file = buildParsedFile(raw, 'command', '.claude/commands/my-cmd.md');
     const vs = runRule('LR-20', file);
     expect(vs.some(v => v.ruleId === 'LR-20' && v.severity === 'WARN')).toBe(true);
@@ -701,7 +701,7 @@ describe('LR-20: LOC soft target warning', () => {
 
   it('PASS — command under 90 LOC soft target', () => {
     const bodyLines = Array.from({ length: 50 }, (_, i) => `line ${i}`).join('\n');
-    const raw = `---\nname: my-cmd\ndescription: Use when doing.\ntools: [Read]\n---\n${bodyLines}`;
+    const raw = `---\nname: my-cmd\ndescription: Use when doing.\nallowed-tools: [Read]\n---\n${bodyLines}`;
     const file = buildParsedFile(raw, 'command', '.claude/commands/my-cmd.md');
     const vs = runRule('LR-20', file);
     expect(vs.filter(v => v.ruleId === 'LR-20')).toHaveLength(0);
@@ -714,7 +714,7 @@ describe('LR-20: LOC soft target warning', () => {
 
 describe('lintFile strict mode', () => {
   it('WARN becomes ERROR in strict mode', () => {
-    const raw = `---\nname: test\ndescription: Use when testing.\nmodel: opus\ntools: [Read]\n---\n## Persona\nTest.`;
+    const raw = `---\nname: test\ndescription: Use when testing.\nmodel: opus\nallowed-tools: [Read]\n---\n## Persona\nTest.`;
     const file = buildParsedFile(raw, 'agent', '.claude/agents/test.md');
     const nonStrictVs = lintFile(file, HERE, false);
     const strictVs = lintFile(file, HERE, true);

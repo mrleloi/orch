@@ -1,7 +1,7 @@
 ---
 name: research-study
 description: Use to invoke research-scanner subagent to study one reference repo and produce structured notes. Used extensively in Phase 0.
-tools: [Read, Bash, Glob]
+allowed-tools: [Read, Bash, Glob]
 ---
 
 # /research-study — Study a Reference Repo

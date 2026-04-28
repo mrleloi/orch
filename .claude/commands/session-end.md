@@ -1,7 +1,7 @@
 ---
 name: session-end
 description: Use to close a work session — persists state, writes session log, stages changes, and prepares handoff. Not optional.
-tools: [Read, Write, Bash]
+allowed-tools: [Read, Write, Bash]
 ---
 
 # /session-end — Close Work Session

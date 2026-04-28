@@ -1,7 +1,7 @@
 ---
 name: context-save
 description: Save a mid-session checkpoint to agent-workspace/memory/checkpoints/ with structured context. Complements git checkpoints for crash-safety in long sessions.
-tools: [Read, Write, Bash]
+allowed-tools: [Read, Write, Bash]
 ---
 
 # /context-save — Mid-Session Checkpoint

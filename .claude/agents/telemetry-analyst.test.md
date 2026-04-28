@@ -7,7 +7,7 @@
 - Master-planner v3 Phase 0.5 reads prior-phase recommendations and the
   recommendations file is absent or stale — operator decides to re-run analyst.
 
-## Expected Behavior
+## Expected behavior (PASS)
 
 Analyst reads rollup table, applies exactly the 4 deterministic rules
 (RULE-1 through RULE-4), and writes
@@ -17,7 +17,7 @@ Analyst reads rollup table, applies exactly the 4 deterministic rules
 the placeholder `(no proposals at this time — all components within
 thresholds)`. Returns structured YAML with `status: DONE`.
 
-## Failure Modes
+## Named failure modes
 
 - MODE-1: Hallucinated proposal — proposal lacks `cites rollup row:` reference.
   Violates Phase 3 Phase 4 contract; caught by 6.2.5 citation linter.

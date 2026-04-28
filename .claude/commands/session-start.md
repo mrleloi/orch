@@ -1,7 +1,7 @@
 ---
 name: session-start
 description: Use at the start of every work session to load project context, identify session type, and output a session brief.
-tools: [Read, Bash, Glob]
+allowed-tools: [Read, Bash, Glob]
 ---
 
 # /session-start — Begin Work Session

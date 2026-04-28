@@ -2,7 +2,7 @@
 name: sandwich-dev
 description: Use when executing a pre-existing session plan end-to-end. Writes code, tests, runs gates. Does NOT plan or re-architect. For per-task execution within a session, prefer task-implementer.
 model: sonnet
-tools: [Read, Write, Edit, Glob, Grep, Bash]
+allowed-tools: [Read, Write, Edit, Glob, Grep, Bash]
 archetype: agent
 test: none
 ---

@@ -1,7 +1,7 @@
 ---
 name: budget-check
 description: Use to inspect current session token usage and report threshold warnings. Auto-runs at 50%, 70%, 85% thresholds.
-tools: [Read, Bash]
+allowed-tools: [Read, Bash]
 ---
 
 # /budget-check — Inspect Session Token Usage

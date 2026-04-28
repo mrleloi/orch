@@ -1,7 +1,7 @@
 ---
 name: harness-audit
 description: Use weekly or after adding/removing agents to audit the harness — subagents, skills, commands, hooks, constitution. Scores A-F and flags drift.
-tools: [Read, Bash, Grep, Glob]
+allowed-tools: [Read, Bash, Grep, Glob]
 ---
 
 # /harness-audit — Reflexive Harness Self-Assessment

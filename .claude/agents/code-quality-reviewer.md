@@ -2,7 +2,7 @@
 name: code-quality-reviewer
 description: Use after spec-compliance-reviewer returns PASS for a task. Fresh context. Reviews code quality, test quality, invariant adherence. Does NOT re-check spec.
 model: sonnet
-tools: [Read, Glob, Grep, Bash]
+allowed-tools: [Read, Glob, Grep, Bash, Write]
 archetype: agent
 test: none
 ---
@@ -58,9 +58,13 @@ For each test added in the diff:
 - Any comments explaining WHAT instead of WHY?
 - Variable/function names match ubiquitous language?
 
-### Phase 5: Write Report
+### Phase 5: Write Report (MANDATORY — DO NOT return inline-only)
 
-`agent-workspace/quality-reports/quality-review-task-<id>-<timestamp>.md`:
+You MUST invoke the `Write` tool to persist the verdict at the canonical path:
+
+`agent-workspace/memory/observations/task-<id>-<YYYYMMDD>-code-quality.md`
+
+(Legacy quality-reports path is deprecated. Inline-only return = audit-trail violation per CF-V2.6-AUDIT-TRAIL-INLINE-RETURN-PATTERN.) Report shape:
 
 ```markdown
 # Code Quality Review — Task <id>
